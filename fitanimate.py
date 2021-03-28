@@ -200,7 +200,7 @@ if args.num:
 inter = 1000.0/float(dataGen.dataSet.fps)
 anim=animation.FuncAnimation(fig, run, dataGen, fargs=(fig,plots,), repeat=False,blit=False,interval=inter,save_count=nData)
 
-outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '.mov'
+outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '.mp4'
 if args.outfile:
     outf = args.outfile
 

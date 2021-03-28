@@ -192,7 +192,6 @@ for plot in plots:
     dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
 
 nData = dataGen.dataSet.nFrames()
-nData = 1000
 
 inter = 1000.0/float(dataGen.dataSet.fps)
 anim=animation.FuncAnimation(fig, run, dataGen, fargs=(fig,plots,), repeat=False,blit=False,interval=inter,save_count=nData)

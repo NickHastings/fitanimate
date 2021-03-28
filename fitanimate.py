@@ -88,10 +88,7 @@ class DataSet:
                     dnew[f] = self._interpolate(d0[f],d1[f])
 
                 self.intData.append( dnew )
-
-            d0 = d1
-
-
+                d0 = d1
 
     def nFrames(self):
         return self.fps * len(self.data)
@@ -149,13 +146,6 @@ class DataGen():
         for data in self.dataSet.intData:
             yield data
 
-#def data_gen():
-#    dataset = prePocessData()
-#    for data in dataset.data:
-#        yield data.t, data.p, data.s, data.c, data.h
-
-
-
 # 1920×1080  => 16:9
 # Size here is in inches
 # matplotlib seems to use 100 DPI
@@ -179,6 +169,16 @@ parser.add_argument(
 parser.add_argument(
     '--offset', '-o', type=float, default=9.0, help='Time offset (hours)'
 )
+parser.add_argument(
+    '--show',    '-s', action='store_true', default=False, help='Show animation'
+)
+parser.add_argument(
+    '--num',    '-n', type=int, default=0, help='Only animate th first N frames'
+)
+parser.add_argument(
+    '--outfile',type=str, default=None, help='Output filename'
+)
+
 
 plotPower = BarPlot( 'power', 'Power',' W',  a_p, limit=1000.0)
 plotSpeed = BarPlot( 'speed', 'Speed', 'km/h', a_s, limit= 60.0, scaleFactor=3.6 )
@@ -189,15 +189,23 @@ args = parser.parse_args()
 fields = []
 for plot in plots:
     fields.append(plot.ffname)
-    dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
+
+dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
 
 nData = dataGen.dataSet.nFrames()
+if args.num:
+    nData = args.num
 
+# Time interval between frames in msec.
 inter = 1000.0/float(dataGen.dataSet.fps)
 anim=animation.FuncAnimation(fig, run, dataGen, fargs=(fig,plots,), repeat=False,blit=False,interval=inter,save_count=nData)
 
 outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '.mov'
+if args.outfile:
+    outf = args.outfile
+
 anim.save(outf, codec="png", fps=dataGen.dataSet.fps,
           savefig_kwargs={'transparent': True, 'facecolor': 'none'})
 
-#plt.show()
+if args.show:
+    plt.show()

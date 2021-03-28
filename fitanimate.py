@@ -40,17 +40,6 @@ def safeData(d):
     else:
         return float(d)
 
-# class DataPoint:
-#     def __init__(self, t, p, s, c, h):
-#         self.t = t
-#         self.p = safeData(p)
-#         self.s = safeData(s)
-#         self.c = safeData(c)
-#         self.h = safeData(h)
-
-#     def __str__(self):
-#         return ' time = {:d}, power = {:5.1f} w, speed = {:4.1f} km/hr, cadance = {:3.0f} RPM, hr = {:3.0f}'.format(self.t, self.p, self.s, self.c, self.h)
-
 class DataSet:
     def __init__(self):
         self.data = []
@@ -200,7 +189,7 @@ args = parser.parse_args()
 fields = []
 for plot in plots:
     fields.append(plot.ffname)
-dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
+    dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
 
 nData = dataGen.dataSet.nFrames()
 nData = 1000

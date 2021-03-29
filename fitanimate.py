@@ -11,39 +11,67 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-class TextData:
+class TextLine:
+    def __init__(self, axes, field_name, txt_format, x, y ):
+        self.axes = axes
+        self.field_name = field_name
+        self.txt_format = txt_format
+        self.x = x
+        self.y = y
+        self.value = 0
+
+        self.axes_text = None
+
+    def setAxesText(self):
+        if not self.axes_text:
+            self.axes_text = self.axes.text( self.x, self.y, self.txt_format.format( self.value ) )
+            return
+
+        self.axes_text.set_text( self.txt_format.format( self.value ) )
+
+    def setValue(self, data ):
+        if 'interpolated' in data and data['interpolated']:
+            return False
+
+        if not (self.field_name in data):
+            return False
+
+        self.value = data[self.field_name]
+        return True
+
+class CounterTextLine(TextLine):
+    def __init__(self,axes, field_name, txt_format, x, y ):
+        TextLine.__init__(self, axes, field_name, txt_format, x, y )
+
+    def setValue(self, data):
+        if self.value == 0 or self.field_name in data:
+            self.value += 1
+            return True
+
+        return False
+
+class TextPlot:
     def __init__(self, axes):
         self.axes = axes
-        self.txt = []
+
+        self.txt_lines = []
+        self.txt_lines.append( CounterTextLine( self.axes, 'lap', 'Lap {}',   -0.5, 1.0 ) )
+        self.txt_lines.append( TextLine( self.axes,'temperature', '{} ℃',    -0.5, 0.7 ) )
+        self.txt_lines.append( TextLine( self.axes,'altitude',    '{:.0f} m', -0.5, 0.4 ) )
 
     def ffNames(self):
         """
-        Return list of fit file variable names requred for this plot
+        Return list of fit file record variable names requred for this plot
         """
         return [ 'temperature', 'altitude']
 
     def update(self, data):
-        ffnames = self.ffNames()
-        for n in ffnames:
-            if not (n in data):
-                return
+        for txt_line in self.txt_lines:
 
-        x = [-0.5, -0.5]
-        y = [1.0, 0.7]
+            if not txt_line.setValue( data ):
+                continue
 
-        s = [
-            '{} ℃'.format(data[ffnames[0]]),
-            '{:.0f} m'.format(data[ffnames[1]])
-        ]
-
-        if len(self.txt)<1:
-            for i in range(len(ffnames)):
-                self.txt.append( self.axes.text(x[i],y[i],s[i]) )
-            return
-
-        for i in range(len(ffnames)):
-            self.txt[i].set_text(s[i])
-
+            txt_line.setAxesText()
 
 # Only one bar
 class BarPlot:
@@ -83,7 +111,6 @@ class DataSet:
         self.data = []
         self.intData = []
         self.fps = 10
-        self._step  = 0
 
     def addData(self, data ):
         if len(self.data) < 1:
@@ -103,48 +130,57 @@ class DataSet:
         return True
 
     def interpolateData(self):
-        self.intData.append( self.data[0] )
-        d0 = self.data[0]
-        for i in range(1,len(self.data)):
-            d1 = self.data[i]
-            for j in range(self.fps):
+        for i in range(len(self.data)-1):
+            d0 = self.data[i]
+            d1 = self.data[i+1]
+            self.intData.append(d0)
+            for j in range(1,self.fps):
                 self._step = j
                 dnew = {}
                 for f in d0.keys():
-                    dnew[f] = self._interpolate(d0[f],d1[f])
-
-                self.intData.append( dnew )
-                d0 = d1
+                    if f != 'lap':
+                        dnew[f] = self._interpolate(d0[f],d1[f],j)
+                        dnew['interpolated'] = True
+                        self.intData.append( dnew )
 
     def nFrames(self):
         return self.fps * len(self.data)
 
-    def _interpolate(self, v0, v1 ):
-        return ( (self.fps-self._step)*v0 + self._step*v1)/float(self.fps)
+    def _interpolate(self, v0, v1, step ):
+        return ( (self.fps-step)*v0 + step*v1)/float(self.fps)
 
     def dump(self):
         for d in self.data:
             print(d)
 
 
-def prePocessData( infile, timeoffset=None, fields = ['power','speed','cadence','heart_rate'] ):
+def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cadence','heart_rate'] ):
     dataset = DataSet()
     ff = fitparse.FitFile( infile )
 
-    for record in ff.get_messages('record'):
+    for message in ff.get_messages(['record','lap']):
         data = {}
-        data['timestamp'] = int(record.get_value('timestamp').timestamp())
-        if timeoffset:
-            data['timestamp'] += timeoffset
+        message_name = message.as_dict()['name']
+        if message_name == 'record':
+            data['timestamp'] = int(message.get_value('timestamp').timestamp())
+            if timeoffset:
+                data['timestamp'] += timeoffset
 
-        for f in fields:
-            data[f] = safeData( record.get_value(f) )
 
-        ok = dataset.addData(data)
-        if not ok:
-            print( 'Problem adding data point. Not adding any more data.')
-            dataset.interpolateData()
-            return dataset
+
+            for f in record_names:
+                data[f] = safeData( message.get_value(f) )
+
+            ok = dataset.addData(data)
+            if not ok:
+                print( 'Problem adding data point. Not adding any more data.')
+                dataset.interpolateData()
+                return dataset
+
+        elif message_name == 'lap' and len(dataset.data)>0:
+            # Just append to the previous data
+            print('Got a lap at. {}'.format(message.get_value('timestamp')))
+            dataset.data[-1]['lap'] = True
 
     dataset.interpolateData()
     return dataset
@@ -153,7 +189,6 @@ def prePocessData( infile, timeoffset=None, fields = ['power','speed','cadence',
 def run(data,fig,plots):
 
     tstr = datetime.fromtimestamp(int(data['timestamp']))
-
     fig.suptitle('{}'.format(tstr))
 
     for plot in plots:
@@ -164,6 +199,7 @@ def run(data,fig,plots):
 class DataGen():
     def __init__(self, dataSet ):
         self.dataSet = dataSet
+
 
     def __call__(self):
 
@@ -225,15 +261,15 @@ plotPower = BarPlot( 'power', 'Power',' W',  a_p, limit=1000.0)
 plotSpeed = BarPlot( 'speed', 'Speed', 'km/h', a_s, limit= 60.0, scaleFactor=3.6 )
 plotCadence = BarPlot( 'cadence', 'Cadence', 'RPM', a_c, limit = 110.0 )
 plotHR  = BarPlot( 'heart_rate', 'Heart Rate', 'BPM', a_h, limit = 190.0 )
-plotText = TextData( a_t )
+plotText = TextPlot( a_t )
 plots = (plotPower, plotSpeed, plotCadence, plotHR, plotText)
 
 
-fields = []
+record_names = []
 for plot in plots:
-    fields += plot.ffNames()
+    record_names += plot.ffNames()
 
-dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
+dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), record_names ) )
 
 nData = dataGen.dataSet.nFrames()
 if args.num:

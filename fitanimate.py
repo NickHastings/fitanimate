@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-plt.rcParams.update({'font.size': 36})
 
 class TextData:
     def __init__(self, axes):
@@ -109,7 +108,6 @@ class DataSet:
                 dnew[f] = safeData(data[f])
 
             dnew['timestamp'] = tt
-
             self.data.append( dnew )
 
         self.data.append( data )
@@ -201,14 +199,30 @@ parser.add_argument(
 parser.add_argument(
     '--outfile',type=str, default=None, help='Output filename'
 )
+parser.add_argument(
+    '--fk', action='store_true', default=False, help='Set 4K output'
+)
+args = parser.parse_args()
 
 # 1920×1080  => 16:9
 # Size here is in inches
 # matplotlib seems to use 100 DPI
 # => 19.20,10.80 for 1080p
 
+# 4k  3840 x 2160
+
 # rows,columns grid
-fig, axes = plt.subplots(3,4,figsize=(19.20,10.80))
+x=19.20
+y=10.80
+fontSize=32
+if args.fk:
+    x=38.20
+    y=21.60
+    fontSize=64
+
+plt.rcParams.update({'font.size': fontSize})
+
+fig, axes = plt.subplots(3,4,figsize=(x,y))
 [ax.set_axis_off() for ax in axes.ravel()]
 (a_p, a_s, a_c, a_h) = axes[2]
 a_t = axes[0][0]
@@ -225,7 +239,7 @@ plotHR  = BarPlot( 'heart_rate', 'Heart Rate', 'BPM', a_h, limit = 190.0 )
 plotText = TextData( a_t )
 plots = (plotPower, plotSpeed, plotCadence, plotHR, plotText)
 
-args = parser.parse_args()
+
 fields = []
 for plot in plots:
     fields += plot.ffNames()

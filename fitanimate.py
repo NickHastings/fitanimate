@@ -12,6 +12,40 @@ import matplotlib.animation as animation
 
 plt.rcParams.update({'font.size': 36})
 
+class TextData:
+    def __init__(self, axes):
+        self.axes = axes
+        self.txt = []
+
+    def ffNames(self):
+        """
+        Return list of fit file variable names requred for this plot
+        """
+        return [ 'temperature', 'altitude']
+
+    def update(self, data):
+        ffnames = self.ffNames()
+        for n in ffnames:
+            if not (n in data):
+                return
+
+        x = [-0.5, -0.5]
+        y = [1.0, 0.7]
+
+        s = [
+            '{} C'.format(data[ffnames[0]]),
+            '{:.0f} m'.format(data[ffnames[1]])
+        ]
+
+        if len(self.txt)<1:
+            for i in range(len(ffnames)):
+                self.txt.append( self.axes.text(x[i],y[i],s[i]) )
+            return
+
+        for i in range(len(ffnames)):
+            self.txt[i].set_text(s[i])
+
+
 # Only one bar
 class BarPlot:
     def __init__(self, ffname, name, units, axes, limit = 100, value = 0.0, scaleFactor=1.0, offSet=0.0 ):
@@ -26,6 +60,11 @@ class BarPlot:
         self.axes.set_title( self.lable(value),  y=-0.3 )
         self.bar = self.axes.bar( name, value, alpha=0.5 )
 
+    def ffNames(self):
+        """
+        Return list of fit file variable names requred for this plot
+        """
+        return [ self.ffname ]
 
     def lable(self, value =0.0):
         return '{:3.0f} {:s}'.format(value,self.units)
@@ -131,9 +170,7 @@ def run(data,fig,plots):
     fig.suptitle('{}'.format(tstr))
 
     for plot in plots:
-        f = 'timestamp'
-        if plot.ffname in data:
-            plot.update(data)
+        plot.update(data)
 
 
 # Yeilds to first argument of run()
@@ -174,6 +211,7 @@ parser.add_argument(
 fig, axes = plt.subplots(3,4,figsize=(19.20,10.80))
 [ax.set_axis_off() for ax in axes.ravel()]
 (a_p, a_s, a_c, a_h) = axes[2]
+a_t = axes[0][0]
 
 # set figure background opacity (alpha) to 0
 fig.patch.set_alpha(0.) # Transparant background
@@ -184,12 +222,13 @@ plotPower = BarPlot( 'power', 'Power',' W',  a_p, limit=1000.0)
 plotSpeed = BarPlot( 'speed', 'Speed', 'km/h', a_s, limit= 60.0, scaleFactor=3.6 )
 plotCadence = BarPlot( 'cadence', 'Cadence', 'RPM', a_c, limit = 110.0 )
 plotHR  = BarPlot( 'heart_rate', 'Heart Rate', 'BPM', a_h, limit = 190.0 )
-plots = (plotPower, plotSpeed, plotCadence, plotHR)
+plotText = TextData( a_t )
+plots = (plotPower, plotSpeed, plotCadence, plotHR, plotText)
 
 args = parser.parse_args()
 fields = []
 for plot in plots:
-    fields.append(plot.ffname)
+    fields += plot.ffNames()
 
 dataGen = DataGen( prePocessData(args.infile, int(args.offset*3600.0), fields ) )
 

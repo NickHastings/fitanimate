@@ -146,20 +146,6 @@ class DataGen():
         for data in self.dataSet.intData:
             yield data
 
-# 1920×1080  => 16:9
-# Size here is in inches
-# matplotlib seems to use 100 DPI
-# => 19.20,10.80 for 1080p
-
-# 3x3 grid -> 9 sets of axes. Just use the bottom three
-fig, axes = plt.subplots(3,3,figsize=(19.20,10.80))
-[ax.set_axis_off() for ax in axes.ravel()]
-(a_p, a_s, a_c) = axes[2]
-
-# set figure background opacity (alpha) to 0
-fig.patch.set_alpha(0.) # Transparant background
-
-# See https://adrian.pw/blog/matplotlib-transparent-animation/
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -179,11 +165,26 @@ parser.add_argument(
     '--outfile',type=str, default=None, help='Output filename'
 )
 
+# 1920×1080  => 16:9
+# Size here is in inches
+# matplotlib seems to use 100 DPI
+# => 19.20,10.80 for 1080p
+
+# rows,columns grid
+fig, axes = plt.subplots(3,4,figsize=(19.20,10.80))
+[ax.set_axis_off() for ax in axes.ravel()]
+(a_p, a_s, a_c, a_h) = axes[2]
+
+# set figure background opacity (alpha) to 0
+fig.patch.set_alpha(0.) # Transparant background
+
+# See https://adrian.pw/blog/matplotlib-transparent-animation/
 
 plotPower = BarPlot( 'power', 'Power',' W',  a_p, limit=1000.0)
 plotSpeed = BarPlot( 'speed', 'Speed', 'km/h', a_s, limit= 60.0, scaleFactor=3.6 )
 plotCadence = BarPlot( 'cadence', 'Cadence', 'RPM', a_c, limit = 110.0 )
-plots = (plotPower, plotSpeed, plotCadence)
+plotHR  = BarPlot( 'heart_rate', 'Heart Rate', 'BPM', a_h, limit = 190.0 )
+plots = (plotPower, plotSpeed, plotCadence, plotHR)
 
 args = parser.parse_args()
 fields = []

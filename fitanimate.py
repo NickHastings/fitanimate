@@ -33,7 +33,7 @@ class TextData:
         y = [1.0, 0.7]
 
         s = [
-            '{} C'.format(data[ffnames[0]]),
+            '{} ℃'.format(data[ffnames[0]]),
             '{:.0f} m'.format(data[ffnames[1]])
         ]
 

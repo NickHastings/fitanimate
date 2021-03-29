@@ -99,17 +99,6 @@ class DataSet:
             print('Negative time delta! Not adding data')
             return False
 
-        # If there are missing seconds since the last entry
-        # Fill in the missing data with data from the last entry
-        dp = self.data[-1]
-        for tt in range(t_prev+1, data['timestamp']-1):
-            dnew = {}
-            for f in dp.keys():
-                dnew[f] = safeData(data[f])
-
-            dnew['timestamp'] = tt
-            self.data.append( dnew )
-
         self.data.append( data )
         return True
 

@@ -141,7 +141,8 @@ class DataSet:
                     if f != 'lap':
                         dnew[f] = self._interpolate(d0[f],d1[f],j)
                         dnew['interpolated'] = True
-                        self.intData.append( dnew )
+
+                self.intData.append( dnew )
 
     def nFrames(self):
         return self.fps * len(self.data)
@@ -179,7 +180,6 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
 
         elif message_name == 'lap' and len(dataset.data)>0:
             # Just append to the previous data
-            print('Got a lap at. {}'.format(message.get_value('timestamp')))
             dataset.data[-1]['lap'] = True
 
     dataset.interpolateData()
@@ -187,7 +187,6 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
 
 
 def run(data,fig,plots):
-
     tstr = datetime.fromtimestamp(int(data['timestamp']))
     fig.suptitle('{}'.format(tstr))
 
@@ -213,7 +212,7 @@ parser.add_argument(
     help='Input .FIT file (Use - for stdin)',
 )
 parser.add_argument(
-    '--offset', '-o', type=float, default=9.0, help='Time offset (hours)'
+    '--offset', type=float, default=9.0, help='Time offset (hours)'
 )
 parser.add_argument(
     '--show',    '-s', action='store_true', default=False, help='Show animation'
@@ -222,7 +221,7 @@ parser.add_argument(
     '--num',    '-n', type=int, default=0, help='Only animate th first N frames'
 )
 parser.add_argument(
-    '--outfile',type=str, default=None, help='Output filename'
+    '--outfile', '-o', type=str, default=None, help='Output filename'
 )
 parser.add_argument(
     '--fk', action='store_true', default=False, help='Set 4K output'
@@ -241,7 +240,7 @@ x=19.20
 y=10.80
 fontSize=32
 if args.fk:
-    x=38.20
+    x=38.40
     y=21.60
     fontSize=64
 
@@ -283,8 +282,9 @@ outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '.mp4'
 if args.outfile:
     outf = args.outfile
 
-anim.save(outf, codec="png", fps=dataGen.dataSet.fps,
-          savefig_kwargs={'transparent': True, 'facecolor': 'none'})
+if not args.show:    
+    anim.save(outf, codec="png", fps=dataGen.dataSet.fps,
+              savefig_kwargs={'transparent': True, 'facecolor': 'none'})
 
 if args.show:
     plt.show()

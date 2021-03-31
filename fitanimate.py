@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import sys
 import glob
 import fitparse
 from datetime import datetime
@@ -56,7 +57,7 @@ class TextPlot:
 
         self.txt_lines = []
         self.txt_lines.append( CounterTextLine( self.axes, 'lap', 'Lap {}',   -0.5, 1.0 ) )
-        self.txt_lines.append( TextLine( self.axes,'temperature', '{} ℃',    -0.5, 0.7 ) )
+        self.txt_lines.append( TextLine( self.axes,'temperature', '{:.0f} ℃',    -0.5, 0.7 ) )
         self.txt_lines.append( TextLine( self.axes,'altitude',    '{:.0f} m', -0.5, 0.4 ) )
 
     def ffNames(self):
@@ -224,8 +225,9 @@ parser.add_argument(
     '--outfile', '-o', type=str, default=None, help='Output filename'
 )
 parser.add_argument(
-    '--fk', action='store_true', default=False, help='Set 4K output'
+    '--format', '-f', type=str, default='4k', help='Output file format. Valid values are 4k or 1080p'
 )
+
 args = parser.parse_args()
 
 # 1920×1080  => 16:9
@@ -236,13 +238,17 @@ args = parser.parse_args()
 # 4k  3840 x 2160
 
 # rows,columns grid
-x=19.20
-y=10.80
-fontSize=32
-if args.fk:
+if args.format == '1080p':
+    x=19.20
+    y=10.80
+    fontSize=32
+elif args.format == '4k':
     x=38.40
     y=21.60
     fontSize=64
+else:
+    print( 'Unkown output format {}'.format(args.format) )
+    sys.exit(1)
 
 plt.rcParams.update({'font.size': fontSize})
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 class TextLine:
     def __init__(self, axes, field_name, txt_format, x=0.0, y=0.0, scale=None ):
@@ -122,8 +123,27 @@ class PlotVar:
 class PlotBase:
     alpha = 0.3
 
+    # Nominal marker sizes are for 4K at 100 DPI
+    nom_size = [38.4, 21.6]
+    nom_dpi = 100.0
+
+    # Normal plot marker size. Diameter in pixels.
+    nom_pms = 12
+
+    def __init__(self):
+        f = plt.gcf()
+        dpi = f.dpi
+        size = f.get_size_inches()
+
+        # Scale by size and DPI
+        self.pms = self.nom_pms * size[0]/self.nom_size[0] * dpi/self.nom_dpi
+
+        # area is pi*r^2
+        self.sms = 3.14159*(0.5*self.pms)**2
+
 class BarPlotBase(PlotBase):
     def __init__(self, plotVars, axes, value = 0.0):
+        PlotBase.__init__(self)
         self.plotVars = plotVars
         self.axes = axes
         self.axes.autoscale_view('tight')
@@ -186,7 +206,7 @@ class BarPlot(BarPlotBase):
 
 class HBarPlot(BarPlotBase):
     txt_dx = 0.01
-    txt_dy = -0.15
+    txt_dy = -0.28
     def __init__(self, plotVars, axes, value = 0.0 ):
         BarPlotBase.__init__(self, plotVars, axes, value )
         self.axes.set_xlim( 0.0, 1.0 )
@@ -205,18 +225,19 @@ class HBarPlot(BarPlotBase):
 class ElevationPlot(PlotBase):
     dscale = 0.001
     def __init__(self, distArr, elevArr, axes ):
+        PlotBase.__init__(self)
         self.axes = axes
         self.axes.set_axis_off()
         for s in ['top','bottom','left','right']:
             self.axes.spines[s].set_visible(False)
 
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
-        self.axes.plot([ self.dscale*d for d in distArr],elevArr,'.',alpha=self.alpha)
+        self.axes.plot([ self.dscale*d for d in distArr],elevArr,'o',markersize=self.pms,alpha=self.alpha)
         #self.axes.set_xlabel('km')
         #self.axes.set_ylabel('m')
 
     def update(self,data):
-        self.axes.plot(self.dscale*data['distance'],data['altitude'],'r.')
+        self.axes.plot(self.dscale*data['distance'],data['altitude'],'ro',markersize=self.pms)
 
     @staticmethod
     def ffNames():
@@ -224,6 +245,7 @@ class ElevationPlot(PlotBase):
 
 class MapPlot(PlotBase):
     def __init__(self, lonArr, latArr, axes, projection ):
+        PlotBase.__init__(self)
         self.axes = axes
         self.axes.outline_patch.set_visible(False)
         self.axes.background_patch.set_visible(False)
@@ -239,11 +261,11 @@ class MapPlot(PlotBase):
             lat_min-0.1*dlat,
             lat_max+0.1*dlat ]
         self.axes.set_extent( b, crs=self.projection )
-        self.axes.scatter( lonArr, latArr,s=4,alpha=self.alpha,transform=self.projection )
+        self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
 
     def update(self,data):
         if 'position_lat' in data and 'position_long' in data:
-            self.axes.scatter(data['position_long'],data['position_lat'],color='red',s=4,alpha=self.alpha,transform=self.projection )
+            self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )
 
     @staticmethod
     def ffNames():

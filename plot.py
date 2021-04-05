@@ -1,26 +1,14 @@
-#!/usr/bin/env python3
-import argparse
-import os
-import sys
-import glob
-import fitparse
 from datetime import datetime
 
-import matplotlib.pyplot as plt
-plt.rcdefaults()
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-
-
 class TextLine:
-    def __init__(self, axes, field_name, txt_format, x=0.0, y=0.0 ):
+    def __init__(self, axes, field_name, txt_format, x=0.0, y=0.0, scale=None ):
         self.axes = axes
         self.field_name = field_name
         self.txt_format = txt_format
         self.x = x
         self.y = y
         self.value = 0
+        self.scale = scale
 
         self.axes_text = None
 
@@ -40,6 +28,8 @@ class TextLine:
 
 
         self.value = data[self.field_name]
+        if self.scale:
+            self.value *= self.scale
         return True
 
 class CounterTextLine(TextLine):
@@ -77,6 +67,8 @@ class TextPlot:
         self._addTextLine( TextLine( self.axes,'temperature', '{:.0f} ℃'))
         self._addTextLine( TextLine( self.axes,'altitude',    '{:.0f} m'))
         self._addTextLine( TextLine( self.axes,'heart_rate',  '{:.0f} BPM'))
+        self._addTextLine( TextLine( self.axes,'distance',  '{:.1f} km', scale=0.001))
+        #self._addTextLine( TextLine( self.axes,'gradient',  '{:.1f}%'))
         self._addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
 
     def _addTextLine(self, textLine ):
@@ -85,11 +77,12 @@ class TextPlot:
         textLine.y = self.y + nlines*self.dy
         self.textLines.append( textLine )
 
-    def ffNames(self):
+    @staticmethod
+    def ffNames():
         """
         Return list of fit file record variable names requred for this plot
         """
-        return [ 'temperature', 'altitude', 'heart_rate']
+        return [ 'temperature', 'altitude', 'heart_rate', 'gradient', 'distance']
 
     def update(self, data):
         for txtLine in self.textLines:
@@ -98,6 +91,35 @@ class TextPlot:
                 continue
 
             txtLine.setAxesText()
+
+class ElevationPlot:
+    dscale = 0.001
+    def __init__(self, distArr, elevArr, axes ):
+        self.axes = axes
+        self.axes.plot([ self.dscale*d for d in distArr],elevArr)
+        self.axes.set_xlabel('km')
+        self.axes.set_ylabel('m')
+
+    def update(self,data):
+        self.axes.plot(self.dscale*data['distance'],data['altitude'],'r.')
+
+    @staticmethod
+    def ffNames():
+        return [ 'distance', 'altitude' ]
+
+class MapPlot:
+    def __init__(self, latArr, lonArr, axes ):
+        self.axes = axes
+        self.axes.scatter( latArr, lonArr )
+
+    def update(self,data):
+        if 'position_lat' in data and 'position_long' in data:
+            self.axes.plot(data['position_long'],data['position_lat'],'r.')
+            
+    @staticmethod
+    def ffNames():
+        return [ 'position_lat', 'position_long' ]
+
 
 # Information about a fitfile record to plot
 class PlotVar:
@@ -135,9 +157,9 @@ class BarPlotBase:
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
         for s in ['top','bottom','left','right']:
             self.axes.spines[s].set_visible(False)
-            
+
         self.makeBar( [ pv.name for pv in self.plotVars ] )
-        
+
         self.text = []
         for i in range(len(self.plotVars)):
             pv = self.plotVars[i]
@@ -181,7 +203,6 @@ class BarPlot(BarPlotBase):
     def makeBar(self, names ):
         self.bar = self.axes.bar( x = names, height = [0.0]*len(names), alpha=self.alpha )
 
-
     def setBarValue(self, bar, value ):
         bar.set_height( value )
 
@@ -207,103 +228,3 @@ class HBarPlot(BarPlotBase):
         pv = self.plotVars[i]
         self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy, pv.getValueUnits(0.0) ) )
 
-def safeData(d):
-    if d is None:
-        return 0.0
-    else:
-        return float(d)
-
-class DataSet:
-    def __init__(self):
-        self.data = []
-        self.intData = []
-        self.fps = 10
-
-    def addData(self, data ):
-        if len(self.data) < 1:
-            self.data.append( data )
-            return True
-
-        t_prev = int(self.data[-1]['timestamp'])
-        dt = int(data['timestamp'])-t_prev
-        if dt == 0:
-            return True
-
-        if dt<0:
-            print('Negative time delta! Not adding data')
-            return False
-
-        self.data.append( data )
-        return True
-
-    def interpolateData(self):
-        for i in range(len(self.data)-1):
-            d0 = self.data[i]
-            d1 = self.data[i+1]
-            self.intData.append(d0)
-            for j in range(1,self.fps):
-                self._step = j
-                dnew = {}
-                for f in d0.keys():
-                    if f != 'lap':
-                        dnew[f] = self._interpolate(d0[f],d1[f],j)
-                        dnew['interpolated'] = True
-
-                self.intData.append( dnew )
-
-    def nFrames(self):
-        return self.fps * len(self.data)
-
-    def _interpolate(self, v0, v1, step ):
-        return ( (self.fps-step)*v0 + step*v1)/float(self.fps)
-
-    def dump(self):
-        for d in self.data:
-            print(d)
-
-
-def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cadence','heart_rate'] ):
-    dataset = DataSet()
-    ff = fitparse.FitFile( infile )
-
-    for message in ff.get_messages(['record','lap']):
-        data = {}
-        message_name = message.as_dict()['name']
-        if message_name == 'record':
-            data['timestamp'] = int(message.get_value('timestamp').timestamp())
-            if timeoffset:
-                data['timestamp'] += timeoffset
-
-
-
-            for f in record_names:
-                data[f] = safeData( message.get_value(f) )
-
-            ok = dataset.addData(data)
-            if not ok:
-                print( 'Problem adding data point. Not adding any more data.')
-                dataset.interpolateData()
-                return dataset
-
-        elif message_name == 'lap' and len(dataset.data)>0:
-            # Just append to the previous data
-            dataset.data[-1]['lap'] = True
-
-    dataset.interpolateData()
-    return dataset
-
-
-def run(data,fig,plots):
-    for plot in plots:
-        plot.update(data)
-
-# Yeilds to first argument of run()
-class DataGen():
-    def __init__(self, dataSet ):
-        self.dataSet = dataSet
-
-
-    def __call__(self):
-
-        for data in self.dataSet.intData:
-            yield data

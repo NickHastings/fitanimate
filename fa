@@ -2,11 +2,15 @@
 import argparse
 import os
 import sys
-import fitanimate as fa
+
+import fitanimate.plot as fap
+import fitanimate.data as fad
+
 import matplotlib.pyplot as plt
+plt.rcdefaults()
 import matplotlib.animation as animation
 
-def main():            
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
@@ -56,34 +60,51 @@ def main():
 
 
     fig = plt.figure(figsize=(x,y))
-    gs = fig.add_gridspec( nrows=5, ncols=1)
+    gs = fig.add_gridspec( nrows=5, ncols=2)
     a_t   = fig.add_subplot( gs[0:4,0] )
-    a_bar = fig.add_subplot( gs[4,0] )
+    a_e   = fig.add_subplot( gs[0:1,1] )
+    a_m   = fig.add_subplot( gs[2:3,1] )
+    
+    a_bar = fig.add_subplot( gs[4,0:] )
 
     fig.patch.set_alpha(0.) # Transparant background
 
     # See https://adrian.pw/blog/matplotlib-transparent-animation/
+
     plotVars = []
-    plotVars.append( fa.PlotVar('cadence', 'Cadence', 'RPM', 120.0 ) )
-    plotVars.append( fa.PlotVar('speed', 'Speed', 'km/h', 80.0, scaleFactor=3.6 ) )
-    plotVars.append( fa.PlotVar('power', 'Power',' W', 1000.0))
+    plotVars.append( fap.PlotVar('cadence', 'Cadence', 'RPM', 120.0 ) )
+    plotVars.append( fap.PlotVar('speed', 'Speed', 'km/h', 80.0, scaleFactor=3.6 ) )
+    plotVars.append( fap.PlotVar('power', 'Power',' W', 1000.0))
 
     if args.vertical:
         plt.subplots_adjust(bottom=0.06, left=0.0, right=1.0, top=1.0)
-        plotBar = fa.BarPlot( plotVars, a_bar )
-        plotText = fa.TextPlot( a_t, x=0.02 )
+        plotBar = BarPlot( plotVars, a_bar )
+        plotText = TextPlot( a_t, x=0.02 )
     else:
         plt.subplots_adjust(bottom=0.0, left=0.11, right=1.0, top=1.0)
-        plotBar = fa.HBarPlot( plotVars, a_bar )
-        plotText = fa.TextPlot( a_t )
+        plotBar = fap.HBarPlot( plotVars, a_bar )
+        plotText = fap.TextPlot( a_t, x=-0.24 )
 
-    plots = (plotBar, plotText)
+    plots = [plotBar, plotText]
 
-    record_names = []
+    record_names = ['position_lat', 'position_long' ]
     for plot in plots:
         record_names += plot.ffNames()
 
-    dataGen = fa.DataGen( fa.prePocessData(args.infile, int(args.offset*3600.0), record_names ) )
+    
+
+    # Remove duplicates
+    record_names = list(dict.fromkeys(record_names))
+
+    dataGen = fad.DataGen( fad.prePocessData(args.infile, int(args.offset*3600.0), record_names ) )
+
+    ep = fap.ElevationPlot( dataGen.dArr, dataGen.aArr, a_e )
+    plots.append(ep)
+
+    mp = fap.MapPlot( dataGen.lonArr, dataGen.latArr, a_m )
+    plots.append(mp)
+
+    
 
     nData = dataGen.dataSet.nFrames()
     if args.num:
@@ -91,13 +112,13 @@ def main():
 
     # Time interval between frames in msec.
     inter = 1000.0/float(dataGen.dataSet.fps)
-    anim=animation.FuncAnimation(fig, fa.run, dataGen, fargs=(fig,plots,), repeat=False,blit=False,interval=inter,save_count=nData)
+    anim=animation.FuncAnimation(fig, fad.run, dataGen, fargs=(fig,tuple(plots),), repeat=False,blit=False,interval=inter,save_count=nData)
 
     outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '_overlay.mp4'
     if args.outfile:
         outf = args.outfile
 
-    if not args.show:    
+    if not args.show:
         anim.save(outf, codec="png", fps=dataGen.dataSet.fps,
                   savefig_kwargs={'transparent': True, 'facecolor': 'none'})
 

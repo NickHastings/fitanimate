@@ -26,10 +26,10 @@ class TextLine:
         if not (self.field_name in data):
             return False
 
-
         self.value = data[self.field_name]
         if self.scale:
             self.value *= self.scale
+
         return True
 
 class CounterTextLine(TextLine):
@@ -92,34 +92,6 @@ class TextPlot:
 
             txtLine.setAxesText()
 
-class ElevationPlot:
-    dscale = 0.001
-    def __init__(self, distArr, elevArr, axes ):
-        self.axes = axes
-        self.axes.plot([ self.dscale*d for d in distArr],elevArr)
-        self.axes.set_xlabel('km')
-        self.axes.set_ylabel('m')
-
-    def update(self,data):
-        self.axes.plot(self.dscale*data['distance'],data['altitude'],'r.')
-
-    @staticmethod
-    def ffNames():
-        return [ 'distance', 'altitude' ]
-
-class MapPlot:
-    def __init__(self, latArr, lonArr, axes ):
-        self.axes = axes
-        self.axes.scatter( latArr, lonArr )
-
-    def update(self,data):
-        if 'position_lat' in data and 'position_long' in data:
-            self.axes.plot(data['position_long'],data['position_lat'],'r.')
-            
-    @staticmethod
-    def ffNames():
-        return [ 'position_lat', 'position_long' ]
-
 
 # Information about a fitfile record to plot
 class PlotVar:
@@ -147,8 +119,10 @@ class PlotVar:
     def getValueUnits(self, value ):
         return '{:.0f} {:}'.format(value,self.units)
 
-class BarPlotBase:
+class PlotBase:
     alpha = 0.3
+
+class BarPlotBase(PlotBase):
     def __init__(self, plotVars, axes, value = 0.0):
         self.plotVars = plotVars
         self.axes = axes
@@ -228,3 +202,49 @@ class HBarPlot(BarPlotBase):
         pv = self.plotVars[i]
         self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy, pv.getValueUnits(0.0) ) )
 
+class ElevationPlot(PlotBase):
+    dscale = 0.001
+    def __init__(self, distArr, elevArr, axes ):
+        self.axes = axes
+        self.axes.set_axis_off()
+        for s in ['top','bottom','left','right']:
+            self.axes.spines[s].set_visible(False)
+
+        self.axes.tick_params(axis=u'both', which=u'both',length=0)
+        self.axes.plot([ self.dscale*d for d in distArr],elevArr,'.',alpha=self.alpha)
+        #self.axes.set_xlabel('km')
+        #self.axes.set_ylabel('m')
+
+    def update(self,data):
+        self.axes.plot(self.dscale*data['distance'],data['altitude'],'r.')
+
+    @staticmethod
+    def ffNames():
+        return [ 'distance', 'altitude' ]
+
+class MapPlot(PlotBase):
+    def __init__(self, lonArr, latArr, axes, projection ):
+        self.axes = axes
+        self.axes.outline_patch.set_visible(False)
+        self.axes.background_patch.set_visible(False)
+        self.projection = projection
+        lon_min=min(lonArr)
+        lon_max=max(lonArr)
+        lat_min=min(latArr)
+        lat_max=max(latArr)
+        dlon = lon_max-lon_min
+        dlat = lat_max-lat_min
+        b=[ lon_min-0.1*dlon,
+            lon_max+0.1*dlon,
+            lat_min-0.1*dlat,
+            lat_max+0.1*dlat ]
+        self.axes.set_extent( b, crs=self.projection )
+        self.axes.scatter( lonArr, latArr,s=4,alpha=self.alpha,transform=self.projection )
+
+    def update(self,data):
+        if 'position_lat' in data and 'position_long' in data:
+            self.axes.scatter(data['position_long'],data['position_lat'],color='red',s=4,alpha=self.alpha,transform=self.projection )
+
+    @staticmethod
+    def ffNames():
+        return [ 'position_lat', 'position_long' ]

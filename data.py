@@ -1,10 +1,14 @@
 import fitparse
 
-def safeData(d):
+def safeData(d,name=None):
     if d is None:
         return 0.0
-    else:
-        return float(d)
+
+    if name and name in ['position_lat','position_long']:
+        # Divide by 2^32/360.
+        return d/11930464.7
+
+    return float(d)
 
 class DataSet:
     def __init__(self):
@@ -81,7 +85,7 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
                 data['timestamp'] += timeoffset
 
             for f in record_names:
-                data[f] = safeData( message.get_value(f) )
+                data[f] = safeData( message.get_value(f), f )
 
             ok = dataset.addData(data)
             if not ok:
@@ -133,7 +137,7 @@ class DataGen():
 
         self.latArr = []
         self.lonArr = []
-        
+
         for data in dataSet.data:
             if 'altitude' in data and 'distance' in data:
                 self.aArr.append(data['altitude'])

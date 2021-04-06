@@ -44,7 +44,7 @@ def main():
     )
     parser.add_argument(
         '--format', '-f', type=str, default='4k', choices=videoFormats.keys(),
-        help='Output file format. Valid values are 4k or 1080p'
+        help='Output video file format.'
     )
     parser.add_argument(
         '--dpi', '-d', type=int, default=100,

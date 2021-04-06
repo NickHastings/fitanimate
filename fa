@@ -12,19 +12,16 @@ import matplotlib.animation as animation
 
 import cartopy.crs as crs
 
-def getFontSize( x, y=None ):
-    # 64 point font for 4k (x=38.40,y=21.60)
-    f = int(64.0* x/38.40)
-    print( 'Will use font size {}'.format(f) )
-    return f
-
+def getFontSize( x, dpi ):
+    # For 64 point font for 4k (x=3840,y=2160) @ 100 dpi
+    return int(64* x/3840 * 100.0/dpi)
 
 def main():
     videoFormats = {
-        '480p': (7.20,4.80),
-        '720p': (12.80,7.20),
-        '1080p': (19.20,10.80),
-        '4k' : (38.40,21.60)
+        '480p': (720,480),
+        '720p': (1280,720),
+        '1080p': (1920,1080),
+        '4k' : (3840,2160)
     }
 
     parser = argparse.ArgumentParser()
@@ -49,16 +46,20 @@ def main():
         help='Output file format. Valid values are 4k or 1080p'
     )
     parser.add_argument(
+        '--dpi', '-d', type=int, default=100,
+        help='Dots Per Inch. Probably shouldn\'t change'
+    )
+    parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
     )
     args = parser.parse_args()
 
     x, y = videoFormats[args.format]
 
-    plt.rcParams.update({'font.size': getFontSize(x)})
+    plt.rcParams.update({'font.size': getFontSize(x,args.dpi), 'figure.dpi': args.dpi })
 
     projection = crs.PlateCarree()
-    fig = plt.figure(figsize=(x,y))
+    fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))
     gs = fig.add_gridspec( nrows=5, ncols=2)
     a_t   = fig.add_subplot( gs[0:4,0] )
     a_e   = fig.add_subplot( gs[0:1,1] )

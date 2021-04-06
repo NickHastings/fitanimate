@@ -123,9 +123,9 @@ class PlotVar:
 class PlotBase:
     alpha = 0.3
 
-    # Nominal marker sizes are for 4K at 100 DPI
-    nom_size = [38.4, 21.6]
+    # Nominal marker sizes are for 3800x2160 (4K) at 100 DPI
     nom_dpi = 100.0
+    nom_size = [3840/nom_dpi, 2160/nom_dpi]
 
     # Normal plot marker size. Diameter in pixels.
     nom_pms = 12

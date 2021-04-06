@@ -12,7 +12,21 @@ import matplotlib.animation as animation
 
 import cartopy.crs as crs
 
+def getFontSize( x, y=None ):
+    # 64 point font for 4k (x=38.40,y=21.60)
+    f = int(64.0* x/38.40)
+    print( 'Will use font size {}'.format(f) )
+    return f
+
+
 def main():
+    videoFormats = {
+        '480p': (7.20,4.80),
+        '720p': (12.80,7.20),
+        '1080p': (19.20,10.80),
+        '4k' : (38.40,21.60)
+    }
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
@@ -31,34 +45,17 @@ def main():
         '--outfile', '-o', type=str, default=None, help='Output filename'
     )
     parser.add_argument(
-        '--format', '-f', type=str, default='4k', help='Output file format. Valid values are 4k or 1080p'
+        '--format', '-f', type=str, default='4k', choices=videoFormats.keys(),
+        help='Output file format. Valid values are 4k or 1080p'
     )
     parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
     )
     args = parser.parse_args()
 
-    if args.format == '480p':
-        x = 7.20
-        y = 4.80
-        fontSize=12
-    elif args.format == '720p':
-        x=12.80
-        y=7.20
-        fontSize=20
-    elif args.format == '1080p':
-        x=19.20
-        y=10.80
-        fontSize=32
-    elif args.format == '4k':
-        x=38.40
-        y=21.60
-        fontSize=64
-    else:
-        print( 'Unkown output format {}'.format(args.format) )
-        sys.exit(1)
+    x, y = videoFormats[args.format]
 
-    plt.rcParams.update({'font.size': fontSize})
+    plt.rcParams.update({'font.size': getFontSize(x)})
 
     projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x,y))
@@ -67,7 +64,7 @@ def main():
     a_e   = fig.add_subplot( gs[0:1,1] )
 
     a_m   = fig.add_subplot( gs[1:4,1], projection=projection )
-    
+
     a_bar = fig.add_subplot( gs[4,0:] )
 
     fig.patch.set_alpha(0.) # Transparant background
@@ -95,7 +92,7 @@ def main():
     for plot in plots:
         record_names += plot.ffNames()
 
-    
+
 
     # Remove duplicates
     record_names = list(dict.fromkeys(record_names))
@@ -108,7 +105,7 @@ def main():
     mp = fap.MapPlot( dataGen.lonArr, dataGen.latArr, a_m, projection )
     plots.append(mp)
 
-    
+
 
     nData = dataGen.dataSet.nFrames()
     if args.num:

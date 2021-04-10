@@ -45,11 +45,17 @@ class CounterTextLine(TextLine):
         return False
 
 class TSTextLine(TextLine):
+    def __init__(self,axes, field_name, txt_format, x=0.0, y=0.0,
+                 timeformat='%H:%M:%S' ):
+        TextLine.__init__(self, axes, field_name, txt_format, x, y )
+        self.timeformat = timeformat
+
     def setValue(self,data):
         if not TextLine.setValue(self, data):
             return False
 
-        self.value = datetime.fromtimestamp(int(self.value))
+        self.value = datetime.fromtimestamp(int(self.value)).strftime(
+            self.timeformat)
         return True
 
 

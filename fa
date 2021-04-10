@@ -51,13 +51,24 @@ def main():
         help='Dots Per Inch. Probably shouldn\'t change'
     )
     parser.add_argument(
+        '--text-color', '-t', type=str, default='black',
+        help='Text Color'
+    )
+    parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
     )
     args = parser.parse_args()
 
     x, y = videoFormats[args.format]
 
-    plt.rcParams.update({'font.size': getFontSize(x,args.dpi), 'figure.dpi': args.dpi })
+    plt.rcParams.update({
+        'font.size': getFontSize(x,args.dpi),
+        'figure.dpi': args.dpi,
+        'text.color': args.text_color,
+        'axes.labelcolor': args.text_color,
+        'xtick.color': args.text_color,
+        'ytick.color': args.text_color
+    })
 
     projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))

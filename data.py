@@ -11,6 +11,8 @@ def safeData(d,name=None):
     return float(d)
 
 class DataSet:
+    # Only iterpolated these fast changing variables
+    do_interpolate =  ['power','speed','cadence']
     def __init__(self):
         self.data = []
         self.intData = []
@@ -42,7 +44,7 @@ class DataSet:
                 self._step = j
                 dnew = {}
                 for f in d0.keys():
-                    if f != 'lap' and f in d0 and f in d1:
+                    if f in d1 and f in self.do_interpolate:
                         dnew[f] = self._interpolate(d0[f],d1[f],j)
                         dnew['interpolated'] = True
 

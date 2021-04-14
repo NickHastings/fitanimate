@@ -101,10 +101,9 @@ def main():
 
     plots = [plotBar, plotText]
 
-    record_names = ['position_lat', 'position_long' ]
+    record_names = [ 'altitude', 'distance','grad', 'position_lat', 'position_long' ]
     for plot in plots:
-        record_names += plot.ffNames()
-
+        record_names += plot.ffNames
 
 
     # Remove duplicates

@@ -82,8 +82,8 @@ class TextPlot:
         textLine.y = ymin + dy*(self.y + nlines*self.dy)
         self.textLines.append( textLine )
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         """
         Return list of fit file record variable names requred for this plot
         """
@@ -106,8 +106,8 @@ class RideText(TextPlot):
         self.addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
         self.addTextLine( TextLine( self.axes, 'gears', '{}'))
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         """
         Return list of fit file record variable names requred for this plot
         """
@@ -179,6 +179,8 @@ class BarPlotBase(PlotBase):
             pv = self.plotVars[i]
             self.appendText(i)
 
+
+    @property
     def ffNames(self):
         """
         Return list of fit file variable names requred for this plot
@@ -269,8 +271,8 @@ class ElevationPlot(PlotBase):
         if 'distance' in data and 'altitude' in data:
             self.axes.plot(data['distance'],data['altitude'],'ro',markersize=self.pms)
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         return [ 'distance', 'altitude' ]
 
 class MapPlot(PlotBase):
@@ -302,6 +304,6 @@ class MapPlot(PlotBase):
         if 'position_lat' in data and 'position_long' in data:
             self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         return [ 'position_lat', 'position_long' ]

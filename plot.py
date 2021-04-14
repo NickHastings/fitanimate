@@ -229,7 +229,8 @@ class HBarPlot(BarPlotBase):
         self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy, pv.getValueUnits(0.0) ) )
 
 class ElevationPlot(PlotBase):
-    dscale = 0.001
+    vScale = 5.0 # Scale the elevation up by this much relative to the distance
+    defaultElevMax = 500.0
     def __init__(self, distArr, elevArr, axes ):
         PlotBase.__init__(self)
         self.axes = axes
@@ -237,13 +238,15 @@ class ElevationPlot(PlotBase):
         for s in ['top','bottom','left','right']:
             self.axes.spines[s].set_visible(False)
 
+        self.axes.set_aspect(self.vScale)
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
-        self.axes.plot([ self.dscale*d for d in distArr],elevArr,'o',markersize=self.pms,alpha=self.alpha)
+        self.axes.plot(distArr,elevArr,'o',markersize=self.pms,alpha=self.alpha)
         #self.axes.set_xlabel('km')
         #self.axes.set_ylabel('m')
 
     def update(self,data):
-        self.axes.plot(self.dscale*data['distance'],data['altitude'],'ro',markersize=self.pms)
+        if 'distance' in data and 'altitude' in data:
+            self.axes.plot(data['distance'],data['altitude'],'ro',markersize=self.pms)
 
     @staticmethod
     def ffNames():

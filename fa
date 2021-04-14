@@ -92,11 +92,11 @@ def main():
     if args.vertical:
         plt.subplots_adjust(bottom=0.06, left=0.0, right=1.0, top=1.0)
         plotBar = BarPlot( plotVars, a_bar )
-        plotText = TextPlot( a_t, x=0.02 )
+        plotText = fap.RideText( a_t, x=0.02 )
     else:
         plt.subplots_adjust(bottom=0.0, left=0.11, right=1.0, top=1.0)
         plotBar = fap.HBarPlot( plotVars, a_bar )
-        plotText = fap.TextPlot( a_t, x=-0.24 )
+        plotText = fap.RideText( a_t, x=-0.24 )
 
 
     plots = [plotBar, plotText]

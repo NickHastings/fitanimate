@@ -65,19 +65,6 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
     dataset = DataSet()
     ff = fitparse.FitFile( infile )
 
-    alti0 = None
-    dist0 = None
-    calc_grad = False
-
-    if 'gradient' in record_names:
-        record_names.remove('gradient')
-        calc_grad = True
-        if not ('altitude' in record_names):
-            record_names.append('altitude')
-        if not ('distance' in record_names):
-            record_names.append('distance')
-
-
     for message in ff.get_messages(['record','lap','event']):
         data = {}
         message_name = message.as_dict()['name']
@@ -106,29 +93,6 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
                                    message.get_value('rear_gear') )
             dataset.data[-1]['gears'] = gears
 
-        if calc_grad:
-            if 'altitude' in data:
-                alti = data['altitude']
-            else:
-                alti = None
-
-            if 'distance' in data:
-                dist = data['distance']
-            else:
-                dist = None
-
-            if ( (not alti0 is None) and (not dist0 is None) and
-                 (not alti is None) and (not dist is None) ):
-                dd=dist-dist0
-                if dd>0.1:
-                    da=alti-alti0
-                    g = 100.0*da/dd
-                    data['gradient'] = g
-
-            if (not alti is None) and (not dist is None):
-                alti0 = alti
-                dist0 = dist
-
     dataset.interpolateData()
     return dataset
 
@@ -156,6 +120,53 @@ class DataGen():
                 self.latArr.append(data['position_lat'])
                 self.lonArr.append(data['position_long'])
 
+        self.mkGradData()
+
+    def mkGradData(self):
+        # Smooth second-by-seceond altitude and distance data to get
+        # better gradient estimates
+        #
+        # Easier to do this here instead of in preProcessData()
+        # since we now have the altitude and distance arrrays
+
+        a = []
+        d = []
+        window_size = 5
+        i = 0
+        if len(self.aArr) != len(self.dArr):
+            print( 'Warning missmatch in distance and altitude data.')
+            return
+
+        while i < len(self.aArr) - window_size + 1:
+            a.append(sum(self.aArr[i : i + window_size]) / window_size)
+            d.append(sum(self.dArr[i : i + window_size]) / window_size)
+            i+=1
+
+        alast=None
+        dlast=None
+        g = []
+        for i in range(len(a)):
+            if not (dlast is None) and not(alast is None):
+                dd = d[i]-dlast
+                da = a[i]-alast
+                g.append(100.0*da/dd)
+            dlast = d[i]
+            alast = a[i]
+
+        # Will be window_size-1 fewer entries. Pad the start.
+        for i in range(window_size):
+            g.insert(0,g[0])
+
+        # Now insert the gradient data
+        i = 0
+        for data in self.dataSet.data:
+            if 'altitude' in data and 'distance' in data:
+                if i >= len(g):
+                    print('Warning grad array size data missmatch.')
+                    break
+
+                data['grad'] = g[i]
+                i+=1
 
     def __call__(self):
         for data in self.dataSet.intData:

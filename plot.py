@@ -21,6 +21,7 @@ class TextLine:
         self.axes_text.set_text( self.txt_format.format( self.value ) )
 
     def setValue(self, data ):
+        # Don't update the text data if it is just a subsecond interpolation
         if 'interpolated' in data and data['interpolated']:
             return False
 

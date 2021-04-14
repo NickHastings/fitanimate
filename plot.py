@@ -266,10 +266,10 @@ class MapPlot(PlotBase):
         lat_max=max(latArr)
         dlon = lon_max-lon_min
         dlat = lat_max-lat_min
-        b=[ lon_min-0.1*dlon,
-            lon_max+0.1*dlon,
-            lat_min-0.1*dlat,
-            lat_max+0.1*dlat ]
+        b=[ lon_min-0.02*dlon,
+            lon_max+0.05*dlon,
+            lat_min-0.02*dlat,
+            lat_max+0.02*dlat ]
         self.axes.set_extent( b, crs=self.projection )
         self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
 

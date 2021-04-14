@@ -78,7 +78,7 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
             record_names.append('distance')
 
 
-    for message in ff.get_messages(['record','lap']):
+    for message in ff.get_messages(['record','lap','event']):
         data = {}
         message_name = message.as_dict()['name']
         if message_name == 'record':
@@ -98,6 +98,13 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
         elif message_name == 'lap' and len(dataset.data)>0:
             # Just append to the previous data
             dataset.data[-1]['lap'] = True
+
+        elif ( message_name == 'event' and
+               message.get_raw_value('gear_change_data') and
+               len(dataset.data)>0 ):
+            gears = '{}-{}'.format(message.get_value('front_gear'),
+                                   message.get_value('rear_gear') )
+            dataset.data[-1]['gears'] = gears
 
         if calc_grad:
             if 'altitude' in data:

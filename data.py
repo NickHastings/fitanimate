@@ -121,9 +121,9 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
                  (not alti is None) and (not dist is None) ):
                 dd=dist-dist0
                 if dd>0.1:
-                     da=alti-alti0
-                     g = 100.0*da/dd
-                     data['gradient'] = g
+                    da=alti-alti0
+                    g = 100.0*da/dd
+                    data['gradient'] = g
 
             if (not alti is None) and (not dist is None):
                 alti0 = alti

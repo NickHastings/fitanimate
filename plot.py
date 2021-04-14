@@ -60,7 +60,6 @@ class TSTextLine(TextLine):
         return True
 
 
-
 class TextPlot:
     def __init__(self, axes, x=-0.11, y=0.92, dx=0.0, dy=-0.08):
         self.x = x
@@ -71,20 +70,16 @@ class TextPlot:
         self.axes.set_axis_off()
 
         self.textLines = []
-        self._addTextLine( TSTextLine( self.axes,'timestamp', '{}' ))
-        self._addTextLine( TextLine( self.axes,'temperature', '{:.0f} ℃'))
-        self._addTextLine( TextLine( self.axes,'altitude',    '{:.0f} m'))
-        self._addTextLine( TextLine( self.axes,'heart_rate',  '{:.0f} BPM'))
-        self._addTextLine( TextLine( self.axes,'distance',  '{:.1f} km', scale=0.001))
-        #self._addTextLine( TextLine( self.axes,'gradient',  '{:.1f}%'))
-        self._addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
-        self._addTextLine( TextLine( self.axes, 'grad', '{:5.1f}%'))
-        self._addTextLine( TextLine( self.axes, 'gears', '{}'))
+    def addTextLine(self, textLine ):
 
-    def _addTextLine(self, textLine ):
+        xmin,xmax = self.axes.get_xlim()
+        dx=xmax-xmin
+        ymin,ymax = self.axes.get_ylim()
+        dy=ymax-ymin
+
         nlines = len(self.textLines)
-        textLine.x = self.x + nlines*self.dx
-        textLine.y = self.y + nlines*self.dy
+        textLine.x = xmin + dx*(self.x + nlines*self.dx)
+        textLine.y = ymin + dy*(self.y + nlines*self.dy)
         self.textLines.append( textLine )
 
     @staticmethod
@@ -92,7 +87,7 @@ class TextPlot:
         """
         Return list of fit file record variable names requred for this plot
         """
-        return [ 'temperature', 'altitude', 'heart_rate', 'gradient', 'distance']
+        return []
 
     def update(self, data):
         for txtLine in self.textLines:
@@ -101,6 +96,22 @@ class TextPlot:
                 continue
 
             txtLine.setAxesText()
+
+class RideText(TextPlot):
+    def __init__(self, axes, x=-0.11, y=0.92, dx=0.0, dy=-0.08):
+        TextPlot.__init__(self, axes, x, y, dx, dy )
+        self.addTextLine( TSTextLine( self.axes,'timestamp', '{}' ))
+        self.addTextLine( TextLine( self.axes,'temperature', '{:.0f} ℃'))
+        self.addTextLine( TextLine( self.axes,'heart_rate',  '{:.0f} BPM'))
+        self.addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
+        self.addTextLine( TextLine( self.axes, 'gears', '{}'))
+
+    @staticmethod
+    def ffNames():
+        """
+        Return list of fit file record variable names requred for this plot
+        """
+        return [ 'temperature', 'altitude', 'heart_rate', 'gradient', 'distance']
 
 
 # Information about a fitfile record to plot
@@ -237,6 +248,7 @@ class ElevationPlot(PlotBase):
     def __init__(self, distArr, elevArr, axes ):
         PlotBase.__init__(self)
         self.axes = axes
+
         self.axes.set_axis_off()
         for s in ['top','bottom','left','right']:
             self.axes.spines[s].set_visible(False)
@@ -247,7 +259,13 @@ class ElevationPlot(PlotBase):
         #self.axes.set_xlabel('km')
         #self.axes.set_ylabel('m')
 
+        # After drawing he plot so we can get the correct x,y limits
+        self.textPlot = TextPlot(self.axes, x=0.8, y=0.8, dy=-0.3)
+        self.textPlot.addTextLine( TextLine( self.axes, 'altitude','{:.0f} m'))
+        self.textPlot.addTextLine( TextLine( self.axes, 'grad', '{:5.1f}%'))
+
     def update(self,data):
+        self.textPlot.update(data)
         if 'distance' in data and 'altitude' in data:
             self.axes.plot(data['distance'],data['altitude'],'ro',markersize=self.pms)
 
@@ -275,7 +293,12 @@ class MapPlot(PlotBase):
         self.axes.set_extent( b, crs=self.projection )
         self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
 
+        # After drawing he plot so we can get the correct x,y limits
+        self.textPlot = TextPlot(self.axes, x=0.95, y=0.95, dy=-0.3)
+        self.textPlot.addTextLine( TextLine( self.axes,'distance', '{:.1f} km', scale=0.001))
+
     def update(self,data):
+        self.textPlot.update(data)
         if 'position_lat' in data and 'position_long' in data:
             self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )
 

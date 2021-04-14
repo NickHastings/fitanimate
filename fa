@@ -73,7 +73,6 @@ def main():
     projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))
     gs = fig.add_gridspec( nrows=5, ncols=2)
-    a_t   = fig.add_subplot( gs[0:4,0] )
     a_e   = fig.add_subplot( gs[0:1,1] )
 
     a_m   = fig.add_subplot( gs[1:4,1], projection=projection )
@@ -91,20 +90,18 @@ def main():
 
     if args.vertical:
         plt.subplots_adjust(bottom=0.06, left=0.0, right=1.0, top=1.0)
-        plotBar = BarPlot( plotVars, a_bar )
-        plotText = fap.RideText( a_t, x=0.02 )
+        plotBar = fap.BarPlot( plotVars, a_bar )
     else:
         plt.subplots_adjust(bottom=0.0, left=0.11, right=1.0, top=1.0)
         plotBar = fap.HBarPlot( plotVars, a_bar )
-        plotText = fap.RideText( a_t, x=-0.24 )
 
+    plotText = fap.RideText( fig )
 
     plots = [plotBar, plotText]
 
-    record_names = ['position_lat', 'position_long' ]
+    record_names = [ 'altitude', 'distance','grad', 'position_lat', 'position_long' ]
     for plot in plots:
-        record_names += plot.ffNames()
-
+        record_names += plot.ffNames
 
 
     # Remove duplicates

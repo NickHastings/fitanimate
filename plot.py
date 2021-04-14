@@ -1,9 +1,10 @@
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
 class TextLine:
-    def __init__(self, axes, field_name, txt_format, x=0.0, y=0.0, scale=None ):
-        self.axes = axes
+    def __init__(self, fig, field_name, txt_format, x=None, y=None, scale=None ):
+        self.fig = fig
         self.field_name = field_name
         self.txt_format = txt_format
         self.x = x
@@ -11,14 +12,14 @@ class TextLine:
         self.value = 0
         self.scale = scale
 
-        self.axes_text = None
+        self.fig_txt = None
 
     def setAxesText(self):
-        if not self.axes_text:
-            self.axes_text = self.axes.text( self.x, self.y, self.txt_format.format( self.value ) )
+        if not self.fig_txt:
+            self.fig_txt = self.fig.text( self.x, self.y, self.txt_format.format( self.value ) )
             return
 
-        self.axes_text.set_text( self.txt_format.format( self.value ) )
+        self.fig_txt.set_text( self.txt_format.format( self.value ) )
 
     def setValue(self, data ):
         # Don't update the text data if it is just a subsecond interpolation
@@ -35,8 +36,8 @@ class TextLine:
         return True
 
 class CounterTextLine(TextLine):
-    def __init__(self,axes, field_name, txt_format, x=0.0, y=0.0 ):
-        TextLine.__init__(self, axes, field_name, txt_format, x, y )
+    def __init__(self, fig, field_name, txt_format, x=None, y=None ):
+        TextLine.__init__(self, fig, field_name, txt_format, x, y )
 
     def setValue(self, data):
         if self.value == 0 or self.field_name in data:
@@ -46,9 +47,9 @@ class CounterTextLine(TextLine):
         return False
 
 class TSTextLine(TextLine):
-    def __init__(self,axes, field_name, txt_format, x=0.0, y=0.0,
+    def __init__(self, fig, field_name, txt_format, x=None, y=None,
                  timeformat='%H:%M:%S' ):
-        TextLine.__init__(self, axes, field_name, txt_format, x, y )
+        TextLine.__init__(self, fig, field_name, txt_format, x, y )
         self.timeformat = timeformat
 
     def setValue(self,data):
@@ -61,29 +62,38 @@ class TSTextLine(TextLine):
 
 
 class TextPlot:
-    def __init__(self, axes, x=-0.11, y=0.92, dx=0.0, dy=-0.08):
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
-        self.axes = axes
-        self.axes.set_axis_off()
-
+    def __init__(self, fig ):
+        self.fig = fig
         self.textLines = []
+
+        # Postion of first text object if not specified
+        self.x = 0.02
+        self.y = 0.95
+
+        # If position for new text is not given offset from previous text by this much
+        self.dx = 0.0
+        self.dy = -0.06
+
     def addTextLine(self, textLine ):
-
-        xmin,xmax = self.axes.get_xlim()
-        dx=xmax-xmin
-        ymin,ymax = self.axes.get_ylim()
-        dy=ymax-ymin
-
         nlines = len(self.textLines)
-        textLine.x = xmin + dx*(self.x + nlines*self.dx)
-        textLine.y = ymin + dy*(self.y + nlines*self.dy)
+
+        if nlines < 1:
+            xprev = self.x-self.dx
+            yprev = self.y-self.dy
+        else:
+            xprev = self.textLines[-1].x
+            yprev = self.textLines[-1].y
+
+        if textLine.x is None:
+            textLine.x = xprev + self.dx
+
+        if textLine.y is None:
+            textLine.y = yprev + self.dy
+
         self.textLines.append( textLine )
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         """
         Return list of fit file record variable names requred for this plot
         """
@@ -98,16 +108,21 @@ class TextPlot:
             txtLine.setAxesText()
 
 class RideText(TextPlot):
-    def __init__(self, axes, x=-0.11, y=0.92, dx=0.0, dy=-0.08):
-        TextPlot.__init__(self, axes, x, y, dx, dy )
-        self.addTextLine( TSTextLine( self.axes,'timestamp', '{}' ))
-        self.addTextLine( TextLine( self.axes,'temperature', '{:.0f} ℃'))
-        self.addTextLine( TextLine( self.axes,'heart_rate',  '{:.0f} BPM'))
-        self.addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
-        self.addTextLine( TextLine( self.axes, 'gears', '{}'))
+    def __init__(self, fig ):
+        TextPlot.__init__(self, fig )
+        self.addTextLine( TSTextLine( self.fig,'timestamp', '{}' )) #, x=.1, y=.9 ))
+        self.addTextLine( TextLine( self.fig,'temperature', '{:.0f} ℃'))
+        self.addTextLine( TextLine( self.fig,'heart_rate',  '{:.0f} BPM'))
+        self.addTextLine( CounterTextLine( self.fig, 'lap', 'Lap {}'))
+        self.addTextLine( TextLine( self.fig, 'gears', '{}'))
 
-    @staticmethod
-    def ffNames():
+        self.addTextLine( TextLine( self.fig, 'altitude','{:.0f} m', x=0.9, y=0.95) )
+        self.addTextLine( TextLine( self.fig, 'grad', '{:5.1f}%'))
+
+        self.addTextLine( TextLine( self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
+
+    @property
+    def ffNames(self):
         """
         Return list of fit file record variable names requred for this plot
         """
@@ -179,6 +194,8 @@ class BarPlotBase(PlotBase):
             pv = self.plotVars[i]
             self.appendText(i)
 
+
+    @property
     def ffNames(self):
         """
         Return list of fit file variable names requred for this plot
@@ -256,21 +273,13 @@ class ElevationPlot(PlotBase):
         self.axes.set_aspect(self.vScale)
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
         self.axes.plot(distArr,elevArr,'o',markersize=self.pms,alpha=self.alpha)
-        #self.axes.set_xlabel('km')
-        #self.axes.set_ylabel('m')
-
-        # After drawing he plot so we can get the correct x,y limits
-        self.textPlot = TextPlot(self.axes, x=0.8, y=0.8, dy=-0.3)
-        self.textPlot.addTextLine( TextLine( self.axes, 'altitude','{:.0f} m'))
-        self.textPlot.addTextLine( TextLine( self.axes, 'grad', '{:5.1f}%'))
 
     def update(self,data):
-        self.textPlot.update(data)
         if 'distance' in data and 'altitude' in data:
             self.axes.plot(data['distance'],data['altitude'],'ro',markersize=self.pms)
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         return [ 'distance', 'altitude' ]
 
 class MapPlot(PlotBase):
@@ -293,15 +302,10 @@ class MapPlot(PlotBase):
         self.axes.set_extent( b, crs=self.projection )
         self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
 
-        # After drawing he plot so we can get the correct x,y limits
-        self.textPlot = TextPlot(self.axes, x=0.95, y=0.95, dy=-0.3)
-        self.textPlot.addTextLine( TextLine( self.axes,'distance', '{:.1f} km', scale=0.001))
-
     def update(self,data):
-        self.textPlot.update(data)
         if 'position_lat' in data and 'position_long' in data:
             self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )
 
-    @staticmethod
-    def ffNames():
+    @property
+    def ffNames(self):
         return [ 'position_lat', 'position_long' ]

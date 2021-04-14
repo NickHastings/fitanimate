@@ -78,6 +78,7 @@ class TextPlot:
         self._addTextLine( TextLine( self.axes,'distance',  '{:.1f} km', scale=0.001))
         #self._addTextLine( TextLine( self.axes,'gradient',  '{:.1f}%'))
         self._addTextLine( CounterTextLine( self.axes, 'lap', 'Lap {}'))
+        self._addTextLine( TextLine( self.axes, 'gears', '{}'))
 
     def _addTextLine(self, textLine ):
         nlines = len(self.textLines)

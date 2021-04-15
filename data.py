@@ -8,7 +8,13 @@ def safeData(d,name=None):
         # Divide by 2^32/360.
         return d/11930464.7
 
-    return float(d)
+    try:
+        fd = float(d)
+    except TypeError:
+        return None
+
+    return fd
+
 
 class DataSet:
     # Only iterpolated these fast changing variables
@@ -61,7 +67,7 @@ class DataSet:
             print(d)
 
 
-def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cadence','heart_rate'] ):
+def prePocessData( infile, record_names, timeoffset=None ):
     dataset = DataSet()
     ff = fitparse.FitFile( infile )
 
@@ -74,7 +80,9 @@ def prePocessData( infile, timeoffset=None, record_names = ['power','speed','cad
                 data['timestamp'] += timeoffset
 
             for f in record_names:
-                data[f] = safeData( message.get_value(f), f )
+                d = safeData( message.get_value(f), f )
+                if d:
+                    data[f] = d
 
             ok = dataset.addData(data)
             if not ok:

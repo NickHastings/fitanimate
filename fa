@@ -95,27 +95,24 @@ def main():
         plt.subplots_adjust(bottom=0.0, left=0.11, right=1.0, top=1.0)
         plotBar = fap.HBarPlot( plotVars, a_bar )
 
-    plotText = fap.RideText( fig )
+    plots = [plotBar]
+    plots.append( fap.RideText( fig ) )
 
-    plots = [plotBar, plotText]
+    mp = fap.MapPlot(a_m, projection )
+    plots.append(mp)
+    ep = fap.ElevationPlot( a_e )
+    plots.append(ep)
 
-    record_names = [ 'altitude', 'distance','grad', 'position_lat', 'position_long' ]
+    record_names = []
     for plot in plots:
         record_names += plot.ffNames
 
-
     # Remove duplicates
     record_names = list(dict.fromkeys(record_names))
+    dataGen = fad.DataGen( fad.prePocessData(args.infile, record_names , int(args.offset*3600.0) ) )
 
-    dataGen = fad.DataGen( fad.prePocessData(args.infile, int(args.offset*3600.0), record_names ) )
-
-    ep = fap.ElevationPlot( dataGen.dArr, dataGen.aArr, a_e )
-    plots.append(ep)
-
-    mp = fap.MapPlot( dataGen.lonArr, dataGen.latArr, a_m, projection )
-    plots.append(mp)
-
-
+    mp.DrawBasePlot( dataGen.lonArr, dataGen.latArr )
+    ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
 
     nData = dataGen.dataSet.nFrames()
     if args.num:
@@ -138,3 +135,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

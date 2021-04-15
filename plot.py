@@ -65,6 +65,7 @@ class TextPlot:
     def __init__(self, fig ):
         self.fig = fig
         self.textLines = []
+        self._ffNames = []
 
         # Postion of first text object if not specified
         self.x = 0.02
@@ -92,12 +93,14 @@ class TextPlot:
 
         self.textLines.append( textLine )
 
+        self._ffNames.append( textLine.field_name )
+
     @property
     def ffNames(self):
         """
         Return list of fit file record variable names requred for this plot
         """
-        return []
+        return self._ffNames
 
     def update(self, data):
         for txtLine in self.textLines:
@@ -121,12 +124,12 @@ class RideText(TextPlot):
 
         self.addTextLine( TextLine( self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
 
-    @property
-    def ffNames(self):
-        """
-        Return list of fit file record variable names requred for this plot
-        """
-        return [ 'temperature', 'altitude', 'heart_rate', 'gradient', 'distance']
+    # @property
+    # def ffNames(self):
+    #     """
+    #     Return list of fit file record variable names requred for this plot
+    #     """
+    #     return [ 'temperature', 'altitude', 'heart_rate', 'gradient', 'distance']
 
 
 # Information about a fitfile record to plot
@@ -262,7 +265,7 @@ class HBarPlot(BarPlotBase):
 class ElevationPlot(PlotBase):
     vScale = 5.0 # Scale the elevation up by this much relative to the distance
     defaultElevMax = 500.0
-    def __init__(self, distArr, elevArr, axes ):
+    def __init__(self, axes ):
         PlotBase.__init__(self)
         self.axes = axes
 
@@ -272,6 +275,8 @@ class ElevationPlot(PlotBase):
 
         self.axes.set_aspect(self.vScale)
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
+
+    def DrawBasePlot( self, distArr, elevArr ):
         self.axes.plot(distArr,elevArr,'o',markersize=self.pms,alpha=self.alpha)
 
     def update(self,data):
@@ -283,12 +288,14 @@ class ElevationPlot(PlotBase):
         return [ 'distance', 'altitude' ]
 
 class MapPlot(PlotBase):
-    def __init__(self, lonArr, latArr, axes, projection ):
+    def __init__(self, axes, projection ):
         PlotBase.__init__(self)
         self.axes = axes
         self.axes.outline_patch.set_visible(False)
         self.axes.background_patch.set_visible(False)
         self.projection = projection
+
+    def DrawBasePlot( self, lonArr, latArr ):
         lon_min=min(lonArr)
         lon_max=max(lonArr)
         lat_min=min(latArr)

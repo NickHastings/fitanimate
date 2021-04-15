@@ -9,6 +9,7 @@ import fitanimate.data as fad
 import matplotlib.pyplot as plt
 plt.rcdefaults()
 import matplotlib.animation as animation
+import matplotlib.gridspec as gridspec
 
 import cartopy.crs as crs
 
@@ -72,12 +73,18 @@ def main():
 
     projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))
-    gs = fig.add_gridspec( nrows=5, ncols=2)
-    a_e   = fig.add_subplot( gs[0:1,1] )
 
-    a_m   = fig.add_subplot( gs[1:4,1], projection=projection )
+    gs_e  = gridspec.GridSpec(1,1)
+    gs_e.update( left=0.6, right=1.0, top=1.0, bottom=0.8)
+    a_e   = plt.subplot( gs_e[0,0] )
 
-    a_bar = fig.add_subplot( gs[4,0:] )
+    gs_m  = gridspec.GridSpec(1,1)
+    gs_m.update( left=0.6, right=1.0, top=0.8, bottom=0.4)
+    a_m   = plt.subplot( gs_m[0,0], projection=projection  )
+
+    gs_b  = gridspec.GridSpec(1,1)
+    gs_b.update( left=0.0, right=1.0, top=0.3, bottom=0.0)
+    a_bar = plt.subplot( gs_b[0,0] )
 
     fig.patch.set_alpha(0.) # Transparant background
 
@@ -89,10 +96,10 @@ def main():
     plotVars.append( fap.PlotVar('power', 'Power',' W', 1000.0))
 
     if args.vertical:
-        plt.subplots_adjust(bottom=0.06, left=0.0, right=1.0, top=1.0)
+        gs_b.update( left=0.0, right=1.0, top=0.3, bottom=0.06)
         plotBar = fap.BarPlot( plotVars, a_bar )
     else:
-        plt.subplots_adjust(bottom=0.0, left=0.11, right=1.0, top=1.0)
+        gs_b.update( left=0.11, right=1.0, top=0.3, bottom=0.0)
         plotBar = fap.HBarPlot( plotVars, a_bar )
 
     plots = [plotBar]

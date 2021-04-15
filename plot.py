@@ -263,11 +263,11 @@ class HBarPlot(BarPlotBase):
         self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy, pv.getValueUnits(0.0) ) )
 
 class ElevationPlot(PlotBase):
-    vScale = 5.0 # Scale the elevation up by this much relative to the distance
-    defaultElevMax = 500.0
-    def __init__(self, axes ):
+    # vscale: Scale the elevation up by this much relative to the distance
+    def __init__(self, axes, vScale = 5.0 ):
         PlotBase.__init__(self)
         self.axes = axes
+        self.vScale = vScale
 
         self.axes.set_axis_off()
         for s in ['top','bottom','left','right']:

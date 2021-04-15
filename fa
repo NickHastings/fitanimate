@@ -58,6 +58,9 @@ def main():
     parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
     )
+    parser.add_argument(
+        '--elevation-factor', '-e', type=float, default=5.0, help='Scale elvation buy this factor, relative to distance in the elevation plot.'
+    )
     args = parser.parse_args()
 
     x, y = videoFormats[args.format]
@@ -83,7 +86,7 @@ def main():
     a_m   = plt.subplot( gs_m[0,0], projection=projection  )
 
     gs_b  = gridspec.GridSpec(1,1)
-    gs_b.update( left=0.0, right=1.0, top=0.3, bottom=0.0)
+    gs_b.update( left=0.11, right=1.0, top=0.15, bottom=0.0)
     a_bar = plt.subplot( gs_b[0,0] )
 
     fig.patch.set_alpha(0.) # Transparant background
@@ -96,10 +99,9 @@ def main():
     plotVars.append( fap.PlotVar('power', 'Power',' W', 1000.0))
 
     if args.vertical:
-        gs_b.update( left=0.0, right=1.0, top=0.3, bottom=0.06)
+        gs_b.update( left=0.0, bottom=0.05, top=0.25)
         plotBar = fap.BarPlot( plotVars, a_bar )
     else:
-        gs_b.update( left=0.11, right=1.0, top=0.3, bottom=0.0)
         plotBar = fap.HBarPlot( plotVars, a_bar )
 
     plots = [plotBar]
@@ -107,7 +109,7 @@ def main():
 
     mp = fap.MapPlot(a_m, projection )
     plots.append(mp)
-    ep = fap.ElevationPlot( a_e )
+    ep = fap.ElevationPlot( a_e, args.elevation_factor )
     plots.append(ep)
 
     record_names = []

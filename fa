@@ -37,33 +37,40 @@ def main():
         '--offset', type=float, default=9.0, help='Time offset (hours)'
     )
     parser.add_argument(
-        '--show',    '-s', action='store_true', default=False, help='Show animation'
+        '--show',    '-s', action='store_true', default=False, help='Show the animation on screen'
     )
     parser.add_argument(
-        '--num',    '-n', type=int, default=0, help='Only animate th first N frames'
+        '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames'
     )
     parser.add_argument(
         '--outfile', '-o', type=str, default=None, help='Output filename'
     )
     parser.add_argument(
         '--format', '-f', type=str, default='4k', choices=videoFormats.keys(),
-        help='Output video file format.'
+        help='Output video file resolution.'
     )
     parser.add_argument(
         '--dpi', '-d', type=int, default=100,
         help='Dots Per Inch. Probably shouldn\'t change'
     )
     parser.add_argument(
-        '--text-color', '-t', type=str, default='black',
+        '--text-color', '-c', type=str, default='black',
         help='Text Color'
     )
     parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
     )
     parser.add_argument(
-        '--elevation-factor', '-e', type=float, default=5.0, help='Scale elvation buy this factor, relative to distance in the elevation plot.'
+        '--elevation-factor', '-e', type=float, default=5.0, help='Scale the elevation by this factor in the plot.'
+    )
+    parser.add_argument(
+        '--test', '-t', action='store_true', help='Options for quick tests. Equivalent to "-s -f 360p".'
     )
     args = parser.parse_args()
+
+    if args.test:
+        args.format = '360p'
+        args.show = True
 
     x, y = videoFormats[args.format]
 
@@ -146,4 +153,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

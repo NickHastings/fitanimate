@@ -132,6 +132,24 @@ def main():
     mp.DrawBasePlot( dataGen.lonArr, dataGen.latArr )
     ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
 
+    # Check the dimensions of the map plot and move it to the edge/top
+    dyOverDx = mp.getHeightOverWidth()
+    gs_points = gs_m[0].get_position(fig).get_points()
+    xmin = gs_points[0][0]
+    ymin = gs_points[0][1]
+    xmax = gs_points[1][0]
+    ymax = gs_points[1][1]
+    dx=xmax-xmin
+    dy=ymax-ymin
+    if dyOverDx>1.0: # Tall plot. Maintain gridspec height, change width
+        dx_new = dx/dyOverDx
+        xmin_new = xmax - dx_new
+        gs_m.update(left=xmin_new)
+    else: # Wide plot. Move up
+        dy_new = dy * max(dyOverDx,0.6) # Don't scale to less that 60%... messes up for some reason
+        ymin_new = ymax - dy_new
+        gs_m.update(bottom=ymin_new)
+
     nData = dataGen.dataSet.nFrames()
     if args.num:
         nData = args.num

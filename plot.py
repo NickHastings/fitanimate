@@ -309,6 +309,13 @@ class MapPlot(PlotBase):
         self.axes.set_extent( b, crs=self.projection )
         self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
 
+    def getHeightOverWidth(self):
+        ymin,ymax = self.axes.get_ylim()
+        dy=ymax-ymin
+        xmin,xmax = self.axes.get_xlim()
+        dx=xmax-xmin
+        return dy/dx
+
     def update(self,data):
         if 'position_lat' in data and 'position_long' in data:
             self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )

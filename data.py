@@ -152,14 +152,21 @@ class DataGen():
 
         alast=None
         dlast=None
+        glast=0.0
+        grad=0.0
         g = []
         for i in range(len(a)):
             if not (dlast is None) and not(alast is None):
                 dd = d[i]-dlast
                 da = a[i]-alast
-                g.append(100.0*da/dd)
+                if dd != 0.0:
+                    grad = 100.0*da/dd
+                else:
+                    grad = glast
+                g.append(grad)
             dlast = d[i]
             alast = a[i]
+            glast = grad
 
         # Will be window_size-1 fewer entries. Pad the start.
         for i in range(window_size):

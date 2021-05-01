@@ -2,7 +2,7 @@ import fitparse
 
 def safeData(d,name=None):
     if d is None:
-        return 0.0
+        return None
 
     if name and name in ['position_lat','position_long']:
         # Divide by 2^32/360.

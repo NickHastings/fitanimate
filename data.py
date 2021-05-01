@@ -81,7 +81,7 @@ def prePocessData( infile, record_names, timeoffset=None ):
 
             for f in record_names:
                 d = safeData( message.get_value(f), f )
-                if d:
+                if not (d is None):
                     data[f] = d
 
             ok = dataset.addData(data)

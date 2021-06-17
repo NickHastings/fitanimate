@@ -2,6 +2,8 @@
 Creates animated graphics from `fit` file data. These graphics can be written to a video file suitable to be used as an overlay of simultaneously recorded video.
 
 ## Install
+
+### Development version
 Clone the repository:
 ```
 git clone https://github.com/NickHastings/fitanimate.git
@@ -9,6 +11,28 @@ git clone https://github.com/NickHastings/fitanimate.git
 Install locally with pip
 ```
 python3 -m pip install ./fitanimate
+```
+### Stable realeases
+```
+python3 -m pip install fitanimate
+```
+
+On Ubuntu or Debian these installations may fail with an error like:
+```
+Proj4 version 0.0.0 is installed, but cartopy requires at least version 4.9.0.
+
+    ----------------------------------------
+    Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-l42wavod/cartopy/
+```
+It seems this can be solved by installing some additonal dependencies (see https://github.com/googlecolab/colabtools/issues/85)
+```
+sudo apt install libproj-dev proj-data proj-bin
+sudo apt install libgeos-dev
+python3 -m pip install cython
+```
+Then finally try again
+```
+python3 -m pip install fitanimate
 ```
 
 ## Usage

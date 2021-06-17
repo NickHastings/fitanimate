@@ -43,6 +43,9 @@ def main():
         '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames'
     )
     parser.add_argument(
+        '--field', type=str, action='append', dest='extraFields', default=[], help='Extra fit file variable to display'
+    )
+    parser.add_argument(
         '--outfile', '-o', type=str, default=None, help='Output filename'
     )
     parser.add_argument(
@@ -114,7 +117,7 @@ def main():
         plotBar = fap.HBarPlot( plotVars, a_bar )
 
     plots = [plotBar]
-    plots.append( fap.RideText( fig ) )
+    plots.append( fap.RideText( fig, args.extraFields ) )
 
     mp = fap.MapPlot(a_m, projection )
     plots.append(mp)

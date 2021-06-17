@@ -111,18 +111,37 @@ class TextPlot:
             txtLine.setAxesText()
 
 class RideText(TextPlot):
-    def __init__(self, fig ):
+    supportedFields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
+    defaultFields = ['timestamp', 'temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
+    def __init__(self, fig, extraFields = [] ):
         TextPlot.__init__(self, fig )
-        self.addTextLine( TSTextLine( self.fig,'timestamp', '{}' )) #, x=.1, y=.9 ))
-        self.addTextLine( TextLine( self.fig,'temperature', '{:.0f} ℃'))
-        self.addTextLine( TextLine( self.fig,'heart_rate',  '{:.0f} BPM'))
-        self.addTextLine( CounterTextLine( self.fig, 'lap', 'Lap {}'))
-        self.addTextLine( TextLine( self.fig, 'gears', '{}'))
+        self.fields = self.defaultFields + extraFields
+        if 'timestamp' in self.fields:
+            self.addTextLine( TSTextLine( self.fig,'timestamp', '{}' )) #, x=.1, y=.9 ))
 
-        self.addTextLine( TextLine( self.fig, 'altitude','{:.0f} m', x=0.9, y=0.95) )
-        self.addTextLine( TextLine( self.fig, 'grad', '{:5.1f}%'))
+        if 'temperature' in self.fields:
+            self.addTextLine( TextLine( self.fig,'temperature', '{:.0f} ℃'))
 
-        self.addTextLine( TextLine( self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
+        if 'core_temperature' in self.fields:
+            self.addTextLine( TextLine( self.fig,'core_temperature', '{:.1f} ℃'))
+
+        if 'heart_rate' in self.fields:        
+            self.addTextLine( TextLine( self.fig,'heart_rate',  '{:.0f} BPM'))
+
+        if 'lap' in self.fields:
+            self.addTextLine( CounterTextLine( self.fig, 'lap', 'Lap {}'))
+
+        if 'gears' in self.fields:
+            self.addTextLine( TextLine( self.fig, 'gears', '{}'))
+
+        # Position near the elevation profile
+        if 'altitude' in self.fields or 'grad' in self.fields:
+            self.addTextLine( TextLine( self.fig, 'altitude','{:.0f} m', x=0.9, y=0.95) )
+            self.addTextLine( TextLine( self.fig, 'grad', '{:5.1f}%'))
+
+        # Near the map
+        if 'distance' in self.fields:
+            self.addTextLine( TextLine( self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
 
     # @property
     # def ffNames(self):
@@ -161,7 +180,7 @@ class PlotVar:
 class PlotBase:
     alpha = 0.3
 
-    # Nominal marker sizes are for 3800x2160 (4K) at 100 DPI
+    # Nominal marker sizes are for 3840x2160 (4K) at 100 DPI
     nom_dpi = 100.0
     nom_size = [3840/nom_dpi, 2160/nom_dpi]
 

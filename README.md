@@ -50,7 +50,7 @@ optional arguments:
   --vertical, -v        Plot bars Verticaly
   --elevation-factor ELEVATION_FACTOR, -e ELEVATION_FACTOR
                         Scale the elevation by this factor in the plot.
-                        --test, -t            Options for quick tests. Equivalent to "-s -f 360p".
+  --test, -t            Options for quick tests. Equivalent to "-s -f 360p".
 ```
 
 For testing use the -t or --test option. Eg

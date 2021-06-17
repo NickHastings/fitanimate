@@ -8,7 +8,6 @@ git clone https://github.com/NickHastings/fitanimate.git
 ```
 Install locally with pip
 ```
-cd fitanimate
 python3 -m pip install ./fitanimate
 ```
 

@@ -112,10 +112,10 @@ class TextPlot:
 
 class RideText(TextPlot):
     supportedFields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
-    defaultFields = ['timestamp', 'temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
-    def __init__(self, fig, extraFields = [] ):
+    def __init__(self, fig, fields ):
         TextPlot.__init__(self, fig )
-        self.fields = self.defaultFields + extraFields
+        self.fields = fields
+
         if 'timestamp' in self.fields:
             self.addTextLine( TSTextLine( self.fig,'timestamp', '{}' )) #, x=.1, y=.9 ))
 
@@ -125,7 +125,7 @@ class RideText(TextPlot):
         if 'core_temperature' in self.fields:
             self.addTextLine( TextLine( self.fig,'core_temperature', '{:.1f} ℃'))
 
-        if 'heart_rate' in self.fields:        
+        if 'heart_rate' in self.fields:
             self.addTextLine( TextLine( self.fig,'heart_rate',  '{:.0f} BPM'))
 
         if 'lap' in self.fields:

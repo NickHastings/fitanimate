@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import configargparse
 from pathlib import Path
 import os

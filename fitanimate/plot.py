@@ -177,6 +177,25 @@ class PlotVar:
     def getValueUnits(self, value ):
         return '{:.0f} {:}'.format(value,self.units)
 
+supportedPlots = ['cadence', 'speed', 'power', 'heart_rate', 'None']
+def newPlotVar(variable):
+    if variable == 'cadence':
+        return PlotVar( variable,'Cadence', 'RPM', 120.0 )
+
+    if variable == 'speed':
+        return PlotVar('speed', 'Speed', 'km/h', 80.0, scaleFactor=3.6 )
+
+    if variable == 'power':
+        return PlotVar('power', 'Power',' W', 1000.0)
+
+    if variable == 'heart_rate':
+        return PlotVar('heart_rate', 'HeartRate',' BPM', 200.0)
+
+    if variable == 'None':
+        return None
+
+    raise ValueError( 'Illegal variable {}. Must be one of: '.format(variable) + ' '.join([str(v) for v in self.supportedPlots]))
+
 class PlotBase:
     alpha = 0.3
 
@@ -215,7 +234,6 @@ class BarPlotBase(PlotBase):
         for i in range(len(self.plotVars)):
             pv = self.plotVars[i]
             self.appendText(i)
-
 
     @property
     def ffNames(self):

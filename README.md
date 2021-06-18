@@ -82,7 +82,7 @@ optional arguments:
 
 For testing use the -t or --test option. Eg
 ```
-fa --test path/to/file.fitanimate
+fa --test path/to/afternoon-ride.fit
 ```
 Sample configuration file.
 ```

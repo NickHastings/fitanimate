@@ -38,31 +38,31 @@ def main():
 
     parser.add_argument(
         'infile', metavar='FITFILE', type=configargparse.FileType(mode='rb'),
-        help='Input .FIT file (Use - for stdin)',
+        help='Input .FIT file (Use - for stdin).',
     )
     parser.add_argument(
-        '--offset', type=float, default=0.0, help='Time offset (hours)'
+        '--offset', type=float, default=0.0, help='Time offset (hours).'
     )
     parser.add_argument(
-        '--show',    '-s', action='store_true', default=False, help='Show the animation on screen'
+        '--show',    '-s', action='store_true', default=False, help='Show the animation on screen.'
     )
     parser.add_argument(
-        '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames'
+        '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames.'
     )
     parser.add_argument(
-        '--fields', type=str, action='append', default=[], help='Fit file variables to display.', choices=fap.RideText.supportedFields
+        '--fields', type=str, action='append', default=[], help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
     )
     parser.add_argument(
-        '--no-elevation', action='store_true', default=False, help='Disable elvation plot'
+        '--plots', type=str, action='append', default=[], help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
     )
     parser.add_argument(
-        '--no-map', action='store_true', default=False, help='Disable map'
+        '--no-elevation', action='store_true', default=False, help='Disable elvation plot.'
     )
     parser.add_argument(
-        '--plots', type=str, action='append', default=[], help='Fit file variables to plot.', choices=fap.supportedPlots
+        '--no-map', action='store_true', default=False, help='Disable map.'
     )
     parser.add_argument(
-        '--outfile', '-o', type=str, default=None, help='Output filename'
+        '--outfile', '-o', type=str, default=None, help='Output filename.'
     )
     parser.add_argument(
         '--format', '-f', type=str, default='1080p', choices=videoFormats.keys(),
@@ -70,14 +70,14 @@ def main():
     )
     parser.add_argument(
         '--dpi', '-d', type=int, default=100,
-        help='Dots Per Inch. Probably shouldn\'t change'
+        help='Dots Per Inch. Probably shouldn\'t change.'
     )
     parser.add_argument(
         '--text-color', '-c', type=str, default='black',
-        help='Text Color'
+        help='Text Color.'
     )
     parser.add_argument(
-        '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly'
+        '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly.'
     )
     parser.add_argument(
         '--elevation-factor', '-e', type=float, default=5.0, help='Scale the elevation by this factor in the plot.'

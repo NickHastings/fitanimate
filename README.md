@@ -26,9 +26,7 @@ Proj4 version 0.0.0 is installed, but cartopy requires at least version 4.9.0.
 ```
 It seems this can be solved by installing some additonal dependencies (see https://github.com/googlecolab/colabtools/issues/85)
 ```
-sudo apt install libproj-dev proj-data proj-bin
-sudo apt install libgeos-dev
-python3 -m pip install cython
+sudo apt install libproj-dev proj-data proj-bin libgeos-dev
 ```
 Then finally try again
 ```

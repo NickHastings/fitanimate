@@ -108,7 +108,6 @@ def main():
         'ytick.color': args.text_color
     })
 
-    projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))
 
     # Elevation
@@ -129,6 +128,7 @@ def main():
             args.fields.remove(f)
 
     else:
+        projection = crs.PlateCarree()
         gs_m  = gridspec.GridSpec(1,1)
         gs_m.update( left=0.6, right=1.0, top=0.8, bottom=0.4)
         a_m   = plt.subplot( gs_m[0,0], projection=projection  )
@@ -185,8 +185,6 @@ def main():
 
     if not args.no_elevation:
         ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
-
-
 
     # Check the dimensions of the map plot and move it to the edge/top
     if not args.no_map:

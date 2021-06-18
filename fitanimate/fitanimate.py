@@ -29,6 +29,7 @@ def main():
     }
 
     defaultFields = ['timestamp', 'temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
+    defaultPlots = ['cadence', 'speed', 'power']
 
     parser = configargparse.ArgumentParser(default_config_files=
                                            [ os.path.join( str(Path.home()), '.config', 'fitanimate', '*.conf'),
@@ -50,6 +51,15 @@ def main():
     )
     parser.add_argument(
         '--fields', type=str, action='append', default=[], help='Fit file variables to display.', choices=fap.RideText.supportedFields
+    )
+    parser.add_argument(
+        '--no-elevation', action='store_true', default=False, help='Disable elvation plot'
+    )
+    parser.add_argument(
+        '--no-map', action='store_true', default=False, help='Disable map'
+    )
+    parser.add_argument(
+        '--plots', type=str, action='append', default=[], help='Fit file variables to plot.', choices=fap.supportedPlots
     )
     parser.add_argument(
         '--outfile', '-o', type=str, default=None, help='Output filename'
@@ -81,6 +91,12 @@ def main():
         args.format = '360p'
         args.show = True
 
+    if len(args.plots) == 0:
+        args.plots = defaultPlots
+
+    if len(args.fields) == 0:
+        args.fields = defaultFields
+
     x, y = videoFormats[args.format]
 
     plt.rcParams.update({
@@ -95,26 +111,47 @@ def main():
     projection = crs.PlateCarree()
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))
 
-    gs_e  = gridspec.GridSpec(1,1)
-    gs_e.update( left=0.6, right=1.0, top=1.0, bottom=0.8)
-    a_e   = plt.subplot( gs_e[0,0] )
+    # Elevation
+    if args.no_elevation: # Don't make the elevation plot and remove related text
+        for f in ['altitude','grad']:
+            if f in  args.fields:
+                args.fields.remove(f)
 
-    gs_m  = gridspec.GridSpec(1,1)
-    gs_m.update( left=0.6, right=1.0, top=0.8, bottom=0.4)
-    a_m   = plt.subplot( gs_m[0,0], projection=projection  )
+    else:
+        gs_e  = gridspec.GridSpec(1,1)
+        gs_e.update( left=0.6, right=1.0, top=1.0, bottom=0.8)
+        a_e   = plt.subplot( gs_e[0,0] )
 
+    # Map
+    if args.no_map:
+        f = 'distance'
+        if f in args.fields:
+            args.fields.remove(f)
+
+    else:
+        gs_m  = gridspec.GridSpec(1,1)
+        gs_m.update( left=0.6, right=1.0, top=0.8, bottom=0.4)
+        a_m   = plt.subplot( gs_m[0,0], projection=projection  )
+
+    # Bar
     gs_b  = gridspec.GridSpec(1,1)
-    gs_b.update( left=0.11, right=1.0, top=0.15, bottom=0.0)
+    # If horizontal, size depends on the number of bars
+    if args.vertical:
+        height = 0.15
+    else:
+        height = 0.05*len(args.plots)
+
+    gs_b.update( left=0.11, right=1.0, top=height, bottom=0.0)
     a_bar = plt.subplot( gs_b[0,0] )
 
     fig.patch.set_alpha(0.) # Transparant background
 
     # See https://adrian.pw/blog/matplotlib-transparent-animation/
 
+    # Bar plots
     plotVars = []
-    plotVars.append( fap.PlotVar('cadence', 'Cadence', 'RPM', 120.0 ) )
-    plotVars.append( fap.PlotVar('speed', 'Speed', 'km/h', 80.0, scaleFactor=3.6 ) )
-    plotVars.append( fap.PlotVar('power', 'Power',' W', 1000.0))
+    for p in args.plots:
+        plotVars.append( fap.newPlotVar(p) )
 
     if args.vertical:
         gs_b.update( left=0.0, bottom=0.05, top=0.25)
@@ -124,15 +161,16 @@ def main():
 
     plots = [plotBar]
 
-    if len(args.fields) == 0:
-        args.fields = defaultFields
-
+    # Text data
     plots.append( fap.RideText( fig, args.fields ) )
 
-    mp = fap.MapPlot(a_m, projection )
-    plots.append(mp)
-    ep = fap.ElevationPlot( a_e, args.elevation_factor )
-    plots.append(ep)
+    if not args.no_map:
+        mp = fap.MapPlot(a_m, projection )
+        plots.append(mp)
+
+    if not args.no_elevation:
+        ep = fap.ElevationPlot( a_e, args.elevation_factor )
+        plots.append(ep)
 
     record_names = []
     for plot in plots:
@@ -142,26 +180,32 @@ def main():
     record_names = list(dict.fromkeys(record_names))
     dataGen = fad.DataGen( fad.prePocessData(args.infile, record_names , int(args.offset*3600.0) ) )
 
-    mp.DrawBasePlot( dataGen.lonArr, dataGen.latArr )
-    ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
+    if not args.no_map:
+        mp.DrawBasePlot( dataGen.lonArr, dataGen.latArr )
+
+    if not args.no_elevation:
+        ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
+
+
 
     # Check the dimensions of the map plot and move it to the edge/top
-    dyOverDx = mp.getHeightOverWidth()
-    gs_points = gs_m[0].get_position(fig).get_points()
-    xmin = gs_points[0][0]
-    ymin = gs_points[0][1]
-    xmax = gs_points[1][0]
-    ymax = gs_points[1][1]
-    dx=xmax-xmin
-    dy=ymax-ymin
-    if dyOverDx>1.0: # Tall plot. Maintain gridspec height, change width
-        dx_new = dx/dyOverDx
-        xmin_new = xmax - dx_new
-        gs_m.update(left=xmin_new)
-    else: # Wide plot. Move up
-        dy_new = dy * max(dyOverDx,0.6) # Don't scale to less that 60%... messes up for some reason
-        ymin_new = ymax - dy_new
-        gs_m.update(bottom=ymin_new)
+    if not args.no_map:
+        dyOverDx = mp.getHeightOverWidth()
+        gs_points = gs_m[0].get_position(fig).get_points()
+        xmin = gs_points[0][0]
+        ymin = gs_points[0][1]
+        xmax = gs_points[1][0]
+        ymax = gs_points[1][1]
+        dx=xmax-xmin
+        dy=ymax-ymin
+        if dyOverDx>1.0: # Tall plot. Maintain gridspec height, change width
+            dx_new = dx/dyOverDx
+            xmin_new = xmax - dx_new
+            gs_m.update(left=xmin_new)
+        else: # Wide plot. Move up
+            dy_new = dy * max(dyOverDx,0.6) # Don't scale to less that 60%... messes up for some reason
+            ymin_new = ymax - dy_new
+            gs_m.update(bottom=ymin_new)
 
     nData = dataGen.dataSet.nFrames()
     if args.num:

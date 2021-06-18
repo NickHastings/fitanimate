@@ -198,6 +198,7 @@ def newPlotVar(variable):
 
 class PlotBase:
     alpha = 0.3
+    hlcolor = 'tab:green'
 
     # Nominal marker sizes are for 3840x2160 (4K) at 100 DPI
     nom_dpi = 100.0
@@ -314,11 +315,11 @@ class ElevationPlot(PlotBase):
         self.axes.tick_params(axis=u'both', which=u'both',length=0)
 
     def DrawBasePlot( self, distArr, elevArr ):
-        self.axes.plot(distArr,elevArr,'o',markersize=self.pms,alpha=self.alpha)
+        self.axes.plot(distArr,elevArr,marker='.',markersize=self.pms,alpha=self.alpha)
 
     def update(self,data):
         if 'distance' in data and 'altitude' in data:
-            self.axes.plot(data['distance'],data['altitude'],'ro',markersize=self.pms)
+            self.axes.plot(data['distance'],data['altitude'],color=self.hlcolor,marker='.',markersize=self.pms)
 
     @property
     def ffNames(self):
@@ -344,7 +345,7 @@ class MapPlot(PlotBase):
             lat_min-0.02*dlat,
             lat_max+0.02*dlat ]
         self.axes.set_extent( b, crs=self.projection )
-        self.axes.scatter( lonArr, latArr,s=self.sms,alpha=self.alpha,transform=self.projection )
+        self.axes.scatter( lonArr, latArr,s=self.sms,marker='.',alpha=self.alpha,transform=self.projection )
 
     def getHeightOverWidth(self):
         ymin,ymax = self.axes.get_ylim()
@@ -355,7 +356,7 @@ class MapPlot(PlotBase):
 
     def update(self,data):
         if 'position_lat' in data and 'position_long' in data:
-            self.axes.scatter(data['position_long'],data['position_lat'],color='red',marker="o",s=self.sms,alpha=self.alpha,transform=self.projection )
+            self.axes.scatter(data['position_long'],data['position_lat'],color=self.hlcolor,marker='.',s=self.sms,alpha=self.alpha,transform=self.projection )
 
     @property
     def ffNames(self):

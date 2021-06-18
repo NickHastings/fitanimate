@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 plt.rcdefaults()
 import matplotlib.animation as animation
 import matplotlib.gridspec as gridspec
+import matplotlib as mpl
+from cycler import cycler
 
 import cartopy.crs as crs
 
@@ -78,6 +80,14 @@ def main():
         help='Text Color.'
     )
     parser.add_argument(
+        '--plot-color', type=str, default='tab:blue',
+        help='Plot Color.'
+    )
+    parser.add_argument(
+        '--highlight-color', type=str, default='tab:red',
+        help='Plot Highlight Color.'
+    )
+    parser.add_argument(
         '--alpha', type=float, default=0.3, help='Opacity of plots.'
     )
     parser.add_argument(
@@ -102,6 +112,9 @@ def main():
         args.fields = args.fields[len(defaultFields):]
 
     fap.PlotBase.alpha = args.alpha
+    fap.PlotBase.hlcolor = args.highlight_color
+
+    print( 'HL color is {}'.format(args.highlight_color ) )
 
     x, y = videoFormats[args.format]
 
@@ -111,7 +124,8 @@ def main():
         'text.color': args.text_color,
         'axes.labelcolor': args.text_color,
         'xtick.color': args.text_color,
-        'ytick.color': args.text_color
+        'ytick.color': args.text_color,
+        'axes.prop_cycle': cycler('color', [args.plot_color])
     })
 
     fig = plt.figure(figsize=(x/args.dpi,y/args.dpi))

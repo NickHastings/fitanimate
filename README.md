@@ -37,11 +37,12 @@ python3 -m pip install fitanimate
 
 Commandline options and configuration file information:
 ```
-fa --help
 usage: fa [-h] [--offset OFFSET] [--show] [--num NUM]
           [--fields {timestamp,temperature,core_temperature,heart_rate,lap,gears,altitude,grad,distance}]
-          [--outfile OUTFILE] [--format {240p,360p,480p,720p,1080p,1440p,4k}]
-          [--dpi DPI] [--text-color TEXT_COLOR] [--vertical]
+          [--plots {cadence,speed,power,heart_rate,None}] [--no-elevation]
+          [--no-map] [--outfile OUTFILE]
+          [--format {240p,360p,480p,720p,1080p,1440p,4k}] [--dpi DPI]
+          [--text-color TEXT_COLOR] [--vertical]
           [--elevation-factor ELEVATION_FACTOR] [--test]
           FITFILE
 
@@ -53,23 +54,27 @@ place, then commandline values override config file values which override
 defaults.
 
 positional arguments:
-  FITFILE               Input .FIT file (Use - for stdin)
+  FITFILE               Input .FIT file (Use - for stdin).
 
 optional arguments:
   -h, --help            show this help message and exit
-  --offset OFFSET       Time offset (hours)
-  --show, -s            Show the animation on screen
-  --num NUM, -n NUM     Only animate the first NUM frames
+  --offset OFFSET       Time offset (hours).
+  --show, -s            Show the animation on screen.
+  --num NUM, -n NUM     Only animate the first NUM frames.
   --fields {timestamp,temperature,core_temperature,heart_rate,lap,gears,altitude,grad,distance}
-                        Fit file variables to display.
+                        Fit file variables to display as text.
+  --plots {cadence,speed,power,heart_rate,None}
+                        Fit file variables to display as bar plot.
+  --no-elevation        Disable elvation plot.
+  --no-map              Disable map.
   --outfile OUTFILE, -o OUTFILE
-                        Output filename
+                        Output filename.
   --format {240p,360p,480p,720p,1080p,1440p,4k}, -f {240p,360p,480p,720p,1080p,1440p,4k}
                         Output video file resolution.
-  --dpi DPI, -d DPI     Dots Per Inch. Probably shouldn't change
+  --dpi DPI, -d DPI     Dots Per Inch. Probably shouldn't change.
   --text-color TEXT_COLOR, -c TEXT_COLOR
-                        Text Color
-  --vertical, -v        Plot bars Verticaly
+                        Text Color.
+  --vertical, -v        Plot bars Verticaly.
   --elevation-factor ELEVATION_FACTOR, -e ELEVATION_FACTOR
                         Scale the elevation by this factor in the plot.
   --test, -t            Options for quick tests. Equivalent to "-s -f 360p".

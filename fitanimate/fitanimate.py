@@ -114,8 +114,6 @@ def main():
     fap.PlotBase.alpha = args.alpha
     fap.PlotBase.hlcolor = args.highlight_color
 
-    print( 'HL color is {}'.format(args.highlight_color ) )
-
     x, y = videoFormats[args.format]
 
     plt.rcParams.update({

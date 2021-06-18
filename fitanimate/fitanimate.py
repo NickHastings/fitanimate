@@ -33,7 +33,8 @@ def main():
 
     parser = configargparse.ArgumentParser(default_config_files=
                                            [ os.path.join( str(Path.home()), '.config', 'fitanimate', '*.conf'),
-                                             os.path.join( str(Path.home()), '.fitanimate.conf') ]
+                                             os.path.join( str(Path.home()), '.fitanimate.conf') ],
+                                           formatter_class=configargparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -50,10 +51,10 @@ def main():
         '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames.'
     )
     parser.add_argument(
-        '--fields', type=str, action='append', default=[], help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
+        '--fields', type=str, action='append', default=defaultFields, help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
     )
     parser.add_argument(
-        '--plots', type=str, action='append', default=[], help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
+        '--plots', type=str, action='append', default=defaultPlots, help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
     )
     parser.add_argument(
         '--no-elevation', action='store_true', default=False, help='Disable elevation plot.'
@@ -77,6 +78,9 @@ def main():
         help='Text Color.'
     )
     parser.add_argument(
+        '--alpha', type=float, default=0.3, help='Opacity of plots.'
+    )
+    parser.add_argument(
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly.'
     )
     parser.add_argument(
@@ -91,11 +95,13 @@ def main():
         args.format = '360p'
         args.show = True
 
-    if len(args.plots) == 0:
-        args.plots = defaultPlots
+    if len(args.plots) != len(defaultPlots): # The user specified plots, remove the defaults
+        args.plots = args.plots[len(defaultPlots):]
 
-    if len(args.fields) == 0:
-        args.fields = defaultFields
+    if len(args.fields) != len(defaultFields): # As above
+        args.fields = args.fields[len(defaultFields):]
+
+    fap.PlotBase.alpha = args.alpha
 
     x, y = videoFormats[args.format]
 

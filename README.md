@@ -65,7 +65,7 @@ optional arguments:
                         Fit file variables to display as text.
   --plots {cadence,speed,power,heart_rate,None}
                         Fit file variables to display as bar plot.
-  --no-elevation        Disable elvation plot.
+  --no-elevation        Disable elevation plot.
   --no-map              Disable map.
   --outfile OUTFILE, -o OUTFILE
                         Output filename.

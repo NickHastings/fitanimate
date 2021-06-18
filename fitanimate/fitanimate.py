@@ -56,7 +56,7 @@ def main():
         '--plots', type=str, action='append', default=[], help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
     )
     parser.add_argument(
-        '--no-elevation', action='store_true', default=False, help='Disable elvation plot.'
+        '--no-elevation', action='store_true', default=False, help='Disable elevation plot.'
     )
     parser.add_argument(
         '--no-map', action='store_true', default=False, help='Disable map.'

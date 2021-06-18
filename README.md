@@ -42,7 +42,8 @@ usage: fa [-h] [--offset OFFSET] [--show] [--num NUM]
           [--plots {cadence,speed,power,heart_rate,None}] [--no-elevation]
           [--no-map] [--outfile OUTFILE]
           [--format {240p,360p,480p,720p,1080p,1440p,4k}] [--dpi DPI]
-          [--text-color TEXT_COLOR] [--vertical]
+          [--text-color TEXT_COLOR] [--plot-color PLOT_COLOR]
+          [--highlight-color HIGHLIGHT_COLOR] [--alpha ALPHA] [--vertical]
           [--elevation-factor ELEVATION_FACTOR] [--test]
           FITFILE
 
@@ -58,26 +59,37 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --offset OFFSET       Time offset (hours).
-  --show, -s            Show the animation on screen.
-  --num NUM, -n NUM     Only animate the first NUM frames.
+  --offset OFFSET       Time offset (hours). (default: 0.0)
+  --show, -s            Show the animation on screen. (default: False)
+  --num NUM, -n NUM     Only animate the first NUM frames. (default: 0)
   --fields {timestamp,temperature,core_temperature,heart_rate,lap,gears,altitude,grad,distance}
-                        Fit file variables to display as text.
+                        Fit file variables to display as text. (default:
+                        ['timestamp', 'temperature', 'heart_rate', 'lap',
+                        'gears', 'altitude', 'grad', 'distance'])
   --plots {cadence,speed,power,heart_rate,None}
-                        Fit file variables to display as bar plot.
-  --no-elevation        Disable elevation plot.
-  --no-map              Disable map.
+                        Fit file variables to display as bar plot. (default:
+                        ['cadence', 'speed', 'power'])
+  --no-elevation        Disable elevation plot. (default: False)
+  --no-map              Disable map. (default: False)
   --outfile OUTFILE, -o OUTFILE
-                        Output filename.
+                        Output filename. (default: None)
   --format {240p,360p,480p,720p,1080p,1440p,4k}, -f {240p,360p,480p,720p,1080p,1440p,4k}
-                        Output video file resolution.
-  --dpi DPI, -d DPI     Dots Per Inch. Probably shouldn't change.
+                        Output video file resolution. (default: 1080p)
+  --dpi DPI, -d DPI     Dots Per Inch. Probably shouldn't change. (default:
+                        100)
   --text-color TEXT_COLOR, -c TEXT_COLOR
-                        Text Color.
-  --vertical, -v        Plot bars Verticaly.
+                        Text Color. (default: black)
+  --plot-color PLOT_COLOR
+                        Plot Color. (default: tab:blue)
+  --highlight-color HIGHLIGHT_COLOR
+                        Plot Highlight Color. (default: tab:red)
+  --alpha ALPHA         Opacity of plots. (default: 0.3)
+  --vertical, -v        Plot bars Verticaly. (default: False)
   --elevation-factor ELEVATION_FACTOR, -e ELEVATION_FACTOR
                         Scale the elevation by this factor in the plot.
+                        (default: 5.0)
   --test, -t            Options for quick tests. Equivalent to "-s -f 360p".
+                        (default: False)
 ```
 
 For testing use the -t or --test option. Eg

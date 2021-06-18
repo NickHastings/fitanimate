@@ -128,7 +128,8 @@ class DataGen():
                 self.latArr.append(data['position_lat'])
                 self.lonArr.append(data['position_long'])
 
-        self.mkGradData()
+        if len(self.aArr)>0:
+            self.mkGradData()
 
     def mkGradData(self):
         # Smooth second-by-seceond altitude and distance data to get

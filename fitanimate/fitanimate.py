@@ -1,26 +1,25 @@
-import configargparse
-from pathlib import Path
+'''Generate animations of data from fit file data
+'''
 import os
-import sys
+from pathlib import Path
+import configargparse
+
+from matplotlib import animation
+from matplotlib import gridspec
+from cycler import cycler
+from cartopy import crs
+import matplotlib.pyplot as plt
+plt.rcdefaults()
 
 import fitanimate.plot as fap
 import fitanimate.data as fad
 
-import matplotlib.pyplot as plt
-plt.rcdefaults()
-import matplotlib.animation as animation
-import matplotlib.gridspec as gridspec
-import matplotlib as mpl
-from cycler import cycler
-
-import cartopy.crs as crs
-
-def getFontSize( x, dpi ):
+def get_font_size( x, dpi ):
     # For 64 point font for 4k (x=3840,y=2160) @ 100 dpi
     return int(64* x/3840 * 100.0/dpi)
 
 def main():
-    videoFormats = {
+    video_formats = {
         '240p': (426,240),
         '360p': (640,360),
         '480p': (720,480),
@@ -30,13 +29,15 @@ def main():
         '4k' : (3840,2160)
     }
 
-    defaultFields = ['timestamp', 'temperature', 'heart_rate', 'lap', 'gears', 'altitude', 'grad', 'distance']
-    defaultPlots = ['cadence', 'speed', 'power']
+    default_fields = ['timestamp', 'temperature', 'heart_rate',
+                     'lap', 'gears', 'altitude', 'grad', 'distance']
+    default_plots = ['cadence', 'speed', 'power']
 
-    parser = configargparse.ArgumentParser(default_config_files=
-                                           [ os.path.join( str(Path.home()), '.config', 'fitanimate', '*.conf'),
-                                             os.path.join( str(Path.home()), '.fitanimate.conf') ],
-                                           formatter_class=configargparse.ArgumentDefaultsHelpFormatter
+    parser = configargparse.ArgumentParser(
+        default_config_files=
+        [ os.path.join( str(Path.home()), '.config', 'fitanimate', '*.conf'),
+          os.path.join( str(Path.home()), '.fitanimate.conf') ],
+        formatter_class=configargparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -53,10 +54,12 @@ def main():
         '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames.'
     )
     parser.add_argument(
-        '--fields', type=str, action='append', default=defaultFields, help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
+        '--fields', type=str, action='append', default=default_fields,
+        help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
     )
     parser.add_argument(
-        '--plots', type=str, action='append', default=defaultPlots, help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
+        '--plots', type=str, action='append', default=default_plots,
+        help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
     )
     parser.add_argument(
         '--no-elevation', action='store_true', default=False, help='Disable elevation plot.'
@@ -68,7 +71,7 @@ def main():
         '--outfile', '-o', type=str, default=None, help='Output filename.'
     )
     parser.add_argument(
-        '--format', '-f', type=str, default='1080p', choices=videoFormats.keys(),
+        '--format', '-f', type=str, default='1080p', choices=video_formats.keys(),
         help='Output video file resolution.'
     )
     parser.add_argument(
@@ -94,10 +97,12 @@ def main():
         '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly.'
     )
     parser.add_argument(
-        '--elevation-factor', '-e', type=float, default=5.0, help='Scale the elevation by this factor in the plot.'
+        '--elevation-factor', '-e', type=float, default=5.0,
+        help='Scale the elevation by this factor in the plot.'
     )
     parser.add_argument(
-        '--test', '-t', action='store_true', help='Options for quick tests. Equivalent to "-s -f 360p".'
+        '--test', '-t', action='store_true',
+        help='Options for quick tests. Equivalent to "-s -f 360p".'
     )
     args = parser.parse_args()
 
@@ -105,19 +110,19 @@ def main():
         args.format = '360p'
         args.show = True
 
-    if len(args.plots) != len(defaultPlots): # The user specified plots, remove the defaults
-        args.plots = args.plots[len(defaultPlots):]
+    if len(args.plots) != len(default_plots): # The user specified plots, remove the defaults
+        args.plots = args.plots[len(default_plots):]
 
-    if len(args.fields) != len(defaultFields): # As above
-        args.fields = args.fields[len(defaultFields):]
+    if len(args.fields) != len(default_fields): # As above
+        args.fields = args.fields[len(default_fields):]
 
     fap.PlotBase.alpha = args.alpha
-    fap.PlotBase.hlcolor = args.highlight_color
+    fap.PlotBase.highlight_color = args.highlight_color
 
-    x, y = videoFormats[args.format]
+    x, y = video_formats[args.format]
 
     plt.rcParams.update({
-        'font.size': getFontSize(x,args.dpi),
+        'font.size': get_font_size(x,args.dpi),
         'figure.dpi': args.dpi,
         'text.color': args.text_color,
         'axes.labelcolor': args.text_color,
@@ -130,9 +135,9 @@ def main():
 
     # Elevation
     if args.no_elevation: # Don't make the elevation plot and remove related text
-        for f in ['altitude','grad']:
-            if f in  args.fields:
-                args.fields.remove(f)
+        for field in ['altitude','grad']:
+            if field in  args.fields:
+                args.fields.remove(field)
 
     else:
         gs_e  = gridspec.GridSpec(1,1)
@@ -141,9 +146,9 @@ def main():
 
     # Map
     if args.no_map:
-        f = 'distance'
-        if f in args.fields:
-            args.fields.remove(f)
+        field = 'distance'
+        if field in args.fields:
+            args.fields.remove(field)
 
     else:
         projection = crs.PlateCarree()
@@ -167,46 +172,49 @@ def main():
     # See https://adrian.pw/blog/matplotlib-transparent-animation/
 
     # Bar plots
-    plotVars = []
-    for p in args.plots:
-        plotVars.append( fap.newPlotVar(p) )
+    plot_vars = []
+    for plot_variable in args.plots:
+        plot_vars.append( fap.new_plot_var(plot_variable) )
 
     if args.vertical:
         gs_b.update( left=0.0, bottom=0.05, top=0.25)
-        plotBar = fap.BarPlot( plotVars, a_bar )
+        plot_bar = fap.BarPlot( plot_vars, a_bar )
     else:
-        plotBar = fap.HBarPlot( plotVars, a_bar )
+        plot_bar = fap.HBarPlot( plot_vars, a_bar )
 
-    plots = [plotBar]
+    plots = [plot_bar]
 
     # Text data
     plots.append( fap.RideText( fig, args.fields ) )
 
+    map_plot = None
     if not args.no_map:
-        mp = fap.MapPlot(a_m, projection )
-        plots.append(mp)
+        map_plot = fap.MapPlot(a_m, projection )
+        plots.append(map_plot)
 
+    elevation_plot = None
     if not args.no_elevation:
-        ep = fap.ElevationPlot( a_e, args.elevation_factor )
-        plots.append(ep)
+        elevation_plot = fap.ElevationPlot( a_e, args.elevation_factor )
+        plots.append(elevation_plot)
 
     record_names = []
     for plot in plots:
-        record_names += plot.ffNames
+        record_names += plot.fit_file_names
 
     # Remove duplicates
     record_names = list(dict.fromkeys(record_names))
-    dataGen = fad.DataGen( fad.prePocessData(args.infile, record_names , int(args.offset*3600.0) ) )
+    data_generator = fad.DataGen( fad.prePocessData(args.infile, record_names,
+                                                    int(args.offset*3600.0) ) )
 
-    if not args.no_map:
-        mp.DrawBasePlot( dataGen.lonArr, dataGen.latArr )
+    if map_plot:
+        map_plot.draw_base_plot( data_generator.long_list, data_generator.lati_list )
 
-    if not args.no_elevation:
-        ep.DrawBasePlot( dataGen.dArr, dataGen.aArr )
+    if elevation_plot:
+        elevation_plot.draw_base_plot( data_generator.distance_list, data_generator.altitude_list )
 
     # Check the dimensions of the map plot and move it to the edge/top
-    if not args.no_map:
-        dyOverDx = mp.getHeightOverWidth()
+    if map_plot:
+        dy_over_dx = map_plot.get_height_over_width()
         gs_points = gs_m[0].get_position(fig).get_points()
         xmin = gs_points[0][0]
         ymin = gs_points[0][1]
@@ -214,29 +222,32 @@ def main():
         ymax = gs_points[1][1]
         dx=xmax-xmin
         dy=ymax-ymin
-        if dyOverDx>1.0: # Tall plot. Maintain gridspec height, change width
-            dx_new = dx/dyOverDx
+        if dy_over_dx>1.0: # Tall plot. Maintain gridspec height, change width
+            dx_new = dx/dy_over_dx
             xmin_new = xmax - dx_new
             gs_m.update(left=xmin_new)
         else: # Wide plot. Move up
-            dy_new = dy * max(dyOverDx,0.6) # Don't scale to less that 60%... messes up for some reason
+            # Don't scale to less that 60%... messes up for some reason
+            dy_new = dy * max(dy_over_dx,0.6)
             ymin_new = ymax - dy_new
             gs_m.update(bottom=ymin_new)
 
-    nData = dataGen.dataSet.nFrames()
+    number_of_frames = data_generator.data_set.number_of_frames()
     if args.num:
-        nData = args.num
+        number_of_frames = args.num
 
     # Time interval between frames in msec.
-    inter = 1000.0/float(dataGen.dataSet.fps)
-    anim=animation.FuncAnimation(fig, fad.run, dataGen, fargs=(fig,tuple(plots),), repeat=False,blit=False,interval=inter,save_count=nData)
+    inter = 1000.0/float(data_generator.data_set.fps)
+    anim=animation.FuncAnimation(fig, fad.run, data_generator, fargs=(fig,tuple(plots),),
+                                 repeat=False, blit=False, interval=inter,
+                                 save_count=number_of_frames)
 
     outf = os.path.splitext(os.path.basename(args.infile.name))[0] + '_overlay.mp4'
     if args.outfile:
         outf = args.outfile
 
     if not args.show:
-        anim.save(outf, codec="png", fps=dataGen.dataSet.fps,
+        anim.save(outf, codec="png", fps=data_generator.data_set.fps,
                   savefig_kwargs={'transparent': True, 'facecolor': 'none'})
 
     if args.show:

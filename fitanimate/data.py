@@ -3,7 +3,7 @@
 
 import fitparse
 
-def safe_data( data, name=None):
+def safe_data(data, name=None):
     '''Protect against invalid input data
     '''
     if data is None:
@@ -32,11 +32,11 @@ class DataSet:
         self.int_data = []
         self.fps = 10
 
-    def add_data(self, data ):
+    def add_data(self, data):
         '''Add a data record
         '''
         if len(self.data) < 1:
-            self.data.append( data )
+            self.data.append(data)
             return True
 
         t_prev = int(self.data[-1]['timestamp'])
@@ -48,7 +48,7 @@ class DataSet:
             print('Negative time delta! Not adding data')
             return False
 
-        self.data.append( data )
+        self.data.append(data)
         return True
 
     def interpolate_data(self):
@@ -65,17 +65,17 @@ class DataSet:
                         dnew[feild] = self._interpolate(data0[feild],data1[feild],j)
                         dnew['interpolated'] = True
 
-                self.int_data.append( dnew )
+                self.int_data.append(dnew)
 
     def number_of_frames(self):
         '''Return the total number of image frames
         '''
         return self.fps * len(self.data)
 
-    def _interpolate(self, value0, value1, step ):
+    def _interpolate(self, value0, value1, step):
         '''Calculate and return an inerpolated data point
         '''
-        return ( (self.fps-step)*value0 + step*value1)/float(self.fps)
+        return ((self.fps-step)*value0 + step*value1)/float(self.fps)
 
     def dump(self):
         '''Write all the data to stdout
@@ -84,11 +84,11 @@ class DataSet:
             print(data)
 
 
-def pre_pocess_data( infile, record_names, timeoffset=None ) -> DataSet:
+def pre_pocess_data(infile, record_names, timeoffset=None) -> DataSet:
     '''Read a fitfile and return a DataSet of data with the request records
     '''
     dataset = DataSet()
-    fit_file = fitparse.FitFile( infile )
+    fit_file = fitparse.FitFile(infile)
 
     for message in fit_file.get_messages(['record','lap','event']):
         data = {}
@@ -99,13 +99,13 @@ def pre_pocess_data( infile, record_names, timeoffset=None ) -> DataSet:
                 data['timestamp'] += timeoffset
 
             for feild in record_names:
-                datum = safe_data( message.get_value(feild), feild )
+                datum = safe_data(message.get_value(feild), feild)
                 if not datum is None:
                     data[feild] = datum
 
             success = dataset.add_data(data)
             if not success:
-                print( 'Problem adding data point. Not adding any more data.')
+                print('Problem adding data point. Not adding any more data.')
                 dataset.interpolate_data()
                 return dataset
 
@@ -113,9 +113,9 @@ def pre_pocess_data( infile, record_names, timeoffset=None ) -> DataSet:
             # Just append to the previous data
             dataset.data[-1]['lap'] = True
 
-        elif ( message_name == 'event' and
-               message.get_raw_value('gear_change_data') and
-               len(dataset.data)>0 ):
+        elif (message_name == 'event' and
+              message.get_raw_value('gear_change_data') and
+              len(dataset.data)>0):
             gears = f"{message.get_value('front_gear')}-{message.get_value('rear_gear')}"
             dataset.data[-1]['gears'] = gears
 
@@ -131,7 +131,7 @@ def run(data, _, plots):
 class DataGen():
     '''Yeilds to first argument of run()
     '''
-    def __init__(self, data_set ):
+    def __init__(self, data_set):
         self.data_set = data_set
 
         self.altitude_list = []
@@ -166,7 +166,7 @@ class DataGen():
         window_size = 5
         i = 0
         if len(self.altitude_list) != len(self.distance_list):
-            print( 'Warning missmatch in distance and altitude data.')
+            print('Warning missmatch in distance and altitude data.')
             return
 
         while i < len(self.altitude_list) - window_size + 1:

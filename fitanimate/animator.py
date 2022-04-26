@@ -28,7 +28,7 @@ default_fields = ['timestamp', 'temperature', 'heart_rate',
                      'lap', 'gears', 'altitude', 'grad', 'distance']
 default_plots = ['cadence', 'speed', 'power']
 
-def get_font_size( x_size, dpi ):
+def get_font_size(x_size, dpi):
     '''Set font size for a given DPI.
     For 64 point font for 4k (x=3840,y=2160) @ 100 dpi
     '''
@@ -37,7 +37,7 @@ def get_font_size( x_size, dpi ):
 class Element:
     '''An plot element to drawn
     '''
-    def __init__(self, gridspec=None, axis=None, plot=None ):
+    def __init__(self, gridspec=None, axis=None, plot=None):
         self.gridspec = gridspec
         self.axis = axis
         self.plot = plot
@@ -45,7 +45,7 @@ class Element:
 class Animator:
     '''Worker class to perform anaimatons from FIT data
     '''
-    def __init__( self, args ):
+    def __init__(self, args):
         self.args = args
 
         self.data_generator = None
@@ -93,15 +93,15 @@ class Animator:
         self.setup_bar()
 
         # Text data
-        self.plots.append( fap.RideText( self.fig, self.args.fields ) )
+        self.plots.append(fap.RideText(self.fig, self.args.fields))
 
         if self.map:
-            self.map.plot = fap.MapPlot(self.map.axis, projection )
+            self.map.plot = fap.MapPlot(self.map.axis, projection)
             self.plots.append(self.map.plot)
 
         if self.elevation:
-            self.elevation.plot = fap.ElevationPlot( self.elevation.axis,
-                                                     self.args.elevation_factor )
+            self.elevation.plot = fap.ElevationPlot(self.elevation.axis,
+                                                    self.args.elevation_factor)
             self.plots.append(self.elevation.plot)
 
         record_names = []
@@ -110,8 +110,8 @@ class Animator:
 
         # Remove duplicates
         record_names = list(dict.fromkeys(record_names))
-        self.data_generator = fad.DataGen( fad.pre_pocess_data(self.args.infile, record_names,
-                                                    int(self.args.offset*3600.0) ) )
+        self.data_generator = fad.DataGen(fad.pre_pocess_data(self.args.infile, record_names,
+                                                    int(self.args.offset*3600.0)))
 
     def setup_elevation(self):
         ''' Setup Elevation plot
@@ -122,9 +122,9 @@ class Animator:
                     self.args.fields.remove(field)
 
         else:
-            self.elevation = Element( gspec.GridSpec(1,1))
-            self.elevation.gridspec.update( left=0.6, right=1.0, top=1.0, bottom=0.8)
-            self.elevation.axis = plt.subplot( self.elevation.gridspec[0,0] )
+            self.elevation = Element(gspec.GridSpec(1,1))
+            self.elevation.gridspec.update(left=0.6, right=1.0, top=1.0, bottom=0.8)
+            self.elevation.axis = plt.subplot(self.elevation.gridspec[0,0])
 
     def setup_map(self):
         '''Setup map plot
@@ -136,37 +136,37 @@ class Animator:
             return None
 
         projection = crs.PlateCarree()
-        self.map = Element( gspec.GridSpec(1,1) )
-        self.map.gridspec.update( left=0.6, right=1.0, top=0.8, bottom=0.4)
-        self.map.axis = plt.subplot( self.map.gridspec[0,0], projection=projection  )
+        self.map = Element(gspec.GridSpec(1,1))
+        self.map.gridspec.update(left=0.6, right=1.0, top=0.8, bottom=0.4)
+        self.map.axis = plt.subplot(self.map.gridspec[0,0], projection=projection)
 
         return projection
 
     def setup_bar(self):
         ''' Setup bar plot
         '''
-        self.bar = Element( gspec.GridSpec(1,1) )
+        self.bar = Element(gspec.GridSpec(1,1))
         # If horizontal, size depends on the number of bars
         if self.args.vertical:
             height = 0.15
         else:
             height = 0.05*len(self.args.plots)
 
-        self.bar.gridspec.update( left=0.11, right=1.0, top=height, bottom=0.0)
-        self.bar.axis = plt.subplot( self.bar.gridspec[0,0] )
+        self.bar.gridspec.update(left=0.11, right=1.0, top=height, bottom=0.0)
+        self.bar.axis = plt.subplot(self.bar.gridspec[0,0])
 
         self.fig.patch.set_alpha(0.) # Transparant background
         # See https://adrian.pw/blog/matplotlib-transparent-animation/
 
         plot_vars = []
         for plot_variable in self.args.plots:
-            plot_vars.append( fap.new_plot_var(plot_variable) )
+            plot_vars.append(fap.new_plot_var(plot_variable))
 
         if self.args.vertical:
-            self.bar.gridspec.update( left=0.0, bottom=0.05, top=0.25)
-            plot_bar = fap.BarPlot( plot_vars, self.bar.axis )
+            self.bar.gridspec.update(left=0.0, bottom=0.05, top=0.25)
+            plot_bar = fap.BarPlot(plot_vars, self.bar.axis)
         else:
-            plot_bar = fap.HBarPlot( plot_vars, self.bar.axis )
+            plot_bar = fap.HBarPlot(plot_vars, self.bar.axis)
 
         self.plots = [plot_bar]
 
@@ -174,12 +174,12 @@ class Animator:
         '''Draw the empty plots
         '''
         if self.map.plot:
-            self.map.plot.draw_base_plot( self.data_generator.long_list,
-                                          self.data_generator.lati_list )
+            self.map.plot.draw_base_plot(self.data_generator.long_list,
+                                         self.data_generator.lati_list)
 
         if self.elevation.plot:
-            self.elevation.plot.draw_base_plot( self.data_generator.distance_list,
-                                                self.data_generator.altitude_list )
+            self.elevation.plot.draw_base_plot(self.data_generator.distance_list,
+                                               self.data_generator.altitude_list)
 
         # Check the dimensions of the map plot and move it to the edge/top
         if self.map.plot:

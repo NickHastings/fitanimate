@@ -12,8 +12,8 @@ def main():
     '''
     parser = configargparse.ArgumentParser(
         default_config_files=
-        [ os.path.join( str(Path.home()), '.config', 'fitanimate', '*.conf'),
-          os.path.join( str(Path.home()), '.fitanimate.conf') ],
+        [ os.path.join(str(Path.home()), '.config', 'fitanimate', '*.conf'),
+          os.path.join(str(Path.home()), '.fitanimate.conf') ],
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter
     )
 

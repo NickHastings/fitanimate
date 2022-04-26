@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class TextLine:
     '''Base class for placeing a line of text
     '''
-    def __init__(self, fig, field_name, txt_format, x=None, y=None, scale=None ):
+    def __init__(self, fig, field_name, txt_format, x=None, y=None, scale=None):
         self.fig = fig
         self.field_name = field_name
         self.txt_format = txt_format
@@ -21,12 +21,12 @@ class TextLine:
         '''Sets the text
         '''
         if not self.fig_txt:
-            self.fig_txt = self.fig.text( self.x, self.y, self.txt_format.format( self.value ) )
+            self.fig_txt = self.fig.text(self.x, self.y, self.txt_format.format(self.value))
             return
 
-        self.fig_txt.set_text( self.txt_format.format( self.value ) )
+        self.fig_txt.set_text(self.txt_format.format(self.value))
 
-    def set_value(self, data ):
+    def set_value(self, data):
         '''Sets the data value
         '''
         # Don't update the text data if it is just a subsecond interpolation
@@ -45,8 +45,8 @@ class TextLine:
 class CounterTextLine(TextLine):
     '''Text line consisting of an incrementing counter
     '''
-    def __init__(self, fig, field_name, txt_format, x=None, y=None ):
-        TextLine.__init__(self, fig, field_name, txt_format, x, y )
+    def __init__(self, fig, field_name, txt_format, x=None, y=None):
+        TextLine.__init__(self, fig, field_name, txt_format, x, y)
 
     def set_value(self, data):
         if self.value == 0 or self.field_name in data:
@@ -59,23 +59,22 @@ class TSTextLine(TextLine):
     '''A showing a time of arbitrary format
     '''
     def __init__(self, fig, field_name, txt_format, x=None, y=None,
-                 timeformat='%H:%M:%S' ):
-        TextLine.__init__(self, fig, field_name, txt_format, x, y )
+                 timeformat='%H:%M:%S'):
+        TextLine.__init__(self, fig, field_name, txt_format, x, y)
         self.timeformat = timeformat
 
     def set_value(self,data):
         if not TextLine.set_value(self, data):
             return False
 
-        self.value = datetime.fromtimestamp(int(self.value)).strftime(
-            self.timeformat)
+        self.value = datetime.fromtimestamp(int(self.value)).strftime(self.timeformat)
         return True
 
 
 class TextPlot:
     '''Generic text data to display
     '''
-    def __init__(self, fig ):
+    def __init__(self, fig):
         self.fig = fig
         self.text_lines = []
 
@@ -90,7 +89,7 @@ class TextPlot:
         self.dx = 0.0
         self.dy = -0.06
 
-    def add_text_line(self, text_line ):
+    def add_text_line(self, text_line):
         '''Adds new text line
         '''
         nlines = len(self.text_lines)
@@ -108,9 +107,9 @@ class TextPlot:
         if text_line.y is None:
             text_line.y = yprev + self.dy
 
-        self.text_lines.append( text_line )
+        self.text_lines.append(text_line)
 
-        self._fit_file_names.append( text_line.field_name )
+        self._fit_file_names.append(text_line.field_name)
 
     @property
     def fit_file_names(self):
@@ -123,7 +122,7 @@ class TextPlot:
         '''
         for text_line in self.text_lines:
 
-            if not text_line.set_value( data ):
+            if not text_line.set_value(data):
                 continue
 
             text_line.set_axes_text()
@@ -133,36 +132,36 @@ class RideText(TextPlot):
     '''
     supported_fields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate',
                        'lap', 'gears', 'altitude', 'grad', 'distance']
-    def __init__(self, fig, fields ):
-        TextPlot.__init__(self, fig )
+    def __init__(self, fig, fields):
+        TextPlot.__init__(self, fig)
         self.fields = fields
 
         if 'timestamp' in self.fields:
-            self.add_text_line( TSTextLine( self.fig,'timestamp', '{}' )) #, x=.1, y=.9 ))
+            self.add_text_line(TSTextLine(self.fig,'timestamp', '{}')) #, x=.1, y=.9))
 
         if 'temperature' in self.fields:
-            self.add_text_line( TextLine( self.fig,'temperature', '{:.0f} ℃'))
+            self.add_text_line(TextLine(self.fig,'temperature', '{:.0f} ℃'))
 
         if 'core_temperature' in self.fields:
-            self.add_text_line( TextLine( self.fig,'core_temperature', '{:.1f} ℃'))
+            self.add_text_line(TextLine(self.fig,'core_temperature', '{:.1f} ℃'))
 
         if 'heart_rate' in self.fields:
-            self.add_text_line( TextLine( self.fig,'heart_rate',  '{:.0f} BPM'))
+            self.add_text_line(TextLine(self.fig,'heart_rate',  '{:.0f} BPM'))
 
         if 'lap' in self.fields:
-            self.add_text_line( CounterTextLine( self.fig, 'lap', 'Lap {}'))
+            self.add_text_line(CounterTextLine(self.fig, 'lap', 'Lap {}'))
 
         if 'gears' in self.fields:
-            self.add_text_line( TextLine( self.fig, 'gears', '{}'))
+            self.add_text_line(TextLine(self.fig, 'gears', '{}'))
 
         # Position near the elevation profile
         if 'altitude' in self.fields or 'grad' in self.fields:
-            self.add_text_line( TextLine( self.fig, 'altitude','{:.0f} m', x=0.9, y=0.95) )
-            self.add_text_line( TextLine( self.fig, 'grad', '{:5.1f}%'))
+            self.add_text_line(TextLine(self.fig, 'altitude','{:.0f} m', x=0.9, y=0.95))
+            self.add_text_line(TextLine(self.fig, 'grad', '{:5.1f}%'))
 
         # Near the map
         if 'distance' in self.fields:
-            self.add_text_line( TextLine( self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
+            self.add_text_line(TextLine(self.fig, 'distance', '{:.1f} km', y=0.75, scale=0.001))
 
     # @property
     # def fit_file_names(self):
@@ -186,23 +185,23 @@ class PlotVar:
         self.offset = offset # Add this to ff data
 
 
-    def get_name_label( self ):
+    def get_name_label(self):
         '''Return the variables name and units
         '''
         return f'{self.name} ({self.units})'
 
-    def get_norm_value( self, data ):
+    def get_norm_value(self, data):
         '''Calculate and return the value normalised between 0 and 1
         '''
-        return (self.get_value(data) - self.offset)/(self.max_value-self.min_value)
+        return (self.get_value(data) - self.offset)/(self.max_value - self.min_value)
 
-    def get_value(self, data ):
+    def get_value(self, data):
         '''Calculate and return the scaled value
         '''
         val = data[self.fit_file_name]
         return val*self.scale_factor + self.offset
 
-    def get_value_units(self, value ):
+    def get_value_units(self, value):
         '''Return the value with units
         '''
         return f'{value:.0f} {self.units:}'
@@ -212,10 +211,10 @@ def new_plot_var(variable):
     '''Return a new PlotVar instance
     '''
     if variable == 'cadence':
-        return PlotVar( variable,'Cadence', 'RPM', 120.0 )
+        return PlotVar(variable,'Cadence', 'RPM', 120.0)
 
     if variable == 'speed':
-        return PlotVar('speed', 'Speed', 'km/h', 80.0, scale_factor=3.6 )
+        return PlotVar('speed', 'Speed', 'km/h', 80.0, scale_factor=3.6)
 
     if variable == 'power':
         return PlotVar('power', 'Power',' W', 1000.0)
@@ -226,7 +225,7 @@ def new_plot_var(variable):
     if variable == 'None':
         return None
 
-    raise ValueError( f'Illegal variable {variable}. Must be one of: ' +
+    raise ValueError(f'Illegal variable {variable}. Must be one of: ' +
                       ', '.join([str(v) for v in supported_plots]))
 
 class PlotBase:
@@ -267,7 +266,7 @@ class BarPlotBase(PlotBase):
         for side in ['top','bottom','left','right']:
             self.axes.spines[side].set_visible(False)
 
-        self.make_bars( [ plot_var.name for plot_var in self.plot_vars ] )
+        self.make_bars([plot_var.name for plot_var in self.plot_vars])
 
         self.text = []
 
@@ -278,9 +277,9 @@ class BarPlotBase(PlotBase):
     def fit_file_names(self):
         '''Returns list of fit file record variable names requred for this plot
         '''
-        return [ plot_var.fit_file_name for plot_var in self.plot_vars ]
+        return [plot_var.fit_file_name for plot_var in self.plot_vars]
 
-    def update(self, data ):
+    def update(self, data):
         '''Updates the stored variables from data
         '''
         for i, plot_var in enumerate(self.plot_vars) :
@@ -288,18 +287,18 @@ class BarPlotBase(PlotBase):
                 continue
 
             value = plot_var.get_value(data)
-            self.text[i].set_text( plot_var.get_value_units(value) )
+            self.text[i].set_text(plot_var.get_value_units(value))
 
             # scale the value for the bar chart
             value = plot_var.get_norm_value(data)
-            self.set_bar_value( self.bar[i], value )
+            self.set_bar_value(self.bar[i], value)
 
-    def set_bar_value(self, bar, value ):
+    def set_bar_value(self, bar, value):
         '''Sets the value of the bar.
         This virtual function that should be implemented in the derived class
         '''
 
-    def append_text(self, i ):
+    def append_text(self, i):
         '''Appends text to the ith bar
         This virtual function that should be implemented in the derived class
         '''
@@ -314,60 +313,60 @@ class BarPlot(BarPlotBase):
     '''
     txt_dx = -0.12
     txt_dy = 0.05
-    def __init__(self, plot_vars, axes ):
-        BarPlotBase.__init__(self, plot_vars, axes )
-        self.axes.set_ylim( 0.0, 1.0 )
+    def __init__(self, plot_vars, axes):
+        BarPlotBase.__init__(self, plot_vars, axes)
+        self.axes.set_ylim(0.0, 1.0)
         self.axes.get_yaxis().set_visible(False)
 
-    def make_bars(self, names ):
+    def make_bars(self, names):
         '''Make vertical bars from list of names
         '''
-        self.bar = self.axes.bar( x = names, height = [0.0]*len(names), alpha=self.alpha )
+        self.bar = self.axes.bar(x = names, height = [0.0]*len(names), alpha=self.alpha)
 
-    def set_bar_value(self, bar, value ):
+    def set_bar_value(self, bar, value):
         '''Set the bar height
         '''
-        bar.set_height( value )
+        bar.set_height(value)
 
-    def append_text(self, i ):
+    def append_text(self, i):
         '''Add text to the bar
         '''
         plot_var = self.plot_vars[i]
-        self.text.append( self.axes.text( i+self.txt_dx, self.txt_dy,
-                                          plot_var.get_value_units(0.0) ) )
+        self.text.append(self.axes.text(i+self.txt_dx, self.txt_dy,
+                                        plot_var.get_value_units(0.0)))
 
 class HBarPlot(BarPlotBase):
     '''Horizontal Bar Plot
     '''
     txt_dx = 0.01
     txt_dy = -0.28
-    def __init__(self, plot_vars, axes ):
-        BarPlotBase.__init__(self, plot_vars, axes )
-        self.axes.set_xlim( 0.0, 1.0 )
+    def __init__(self, plot_vars, axes):
+        BarPlotBase.__init__(self, plot_vars, axes)
+        self.axes.set_xlim(0.0, 1.0)
         self.axes.get_xaxis().set_visible(False)
 
-    def make_bars(self, names ):
+    def make_bars(self, names):
         '''Make horizontal bars from list of names
         '''
-        self.bar = self.axes.barh( y = names, width = [0.0]*len(names), alpha=self.alpha )
+        self.bar = self.axes.barh(y = names, width = [0.0]*len(names), alpha=self.alpha)
 
-    def set_bar_value(self, bar, value ):
+    def set_bar_value(self, bar, value):
         '''Set the bar lenth
         '''
-        bar.set_width( value )
+        bar.set_width(value)
 
-    def append_text(self, i ):
+    def append_text(self, i):
         '''Add text to the bar
         '''
         plot_var = self.plot_vars[i]
-        self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy,
-                                          plot_var.get_value_units(0.0) ) )
+        self.text.append(self.axes.text(self.txt_dx, i+self.txt_dy,
+                                         plot_var.get_value_units(0.0)))
 
 class ElevationPlot(PlotBase):
     '''Plot showing the activity elvation trace
     '''
     # vscale: Scale the elevation up by this much relative to the distance
-    def __init__(self, axes, vertical_scale = 5.0 ):
+    def __init__(self, axes, vertical_scale = 5.0):
         PlotBase.__init__(self)
         self.axes = axes
         self.vertical_scale = vertical_scale
@@ -379,7 +378,7 @@ class ElevationPlot(PlotBase):
         self.axes.set_aspect(self.vertical_scale)
         self.axes.tick_params(axis='both', which='both',length=0)
 
-    def draw_base_plot( self, dist_list, elev_list ):
+    def draw_base_plot(self, dist_list, elev_list):
         '''Draw full elevation profile on the background
         '''
         self.axes.plot(dist_list, elev_list, marker='.', markersize=self.pms,alpha=self.alpha)
@@ -400,14 +399,14 @@ class ElevationPlot(PlotBase):
 class MapPlot(PlotBase):
     '''Plot show the activity position trace
     '''
-    def __init__(self, axes, projection ):
+    def __init__(self, axes, projection):
         PlotBase.__init__(self)
         self.axes = axes
         self.axes.outline_patch.set_visible(False)
         self.axes.background_patch.set_visible(False)
         self.projection = projection
 
-    def draw_base_plot( self, long_list, lati_list ):
+    def draw_base_plot(self, long_list, lati_list):
         '''Draw full activity trace on the background
         '''
         lon_min=min(long_list)
@@ -420,9 +419,9 @@ class MapPlot(PlotBase):
             lon_max+0.05*dlon,
             lat_min-0.02*dlat,
             lat_max+0.02*dlat ]
-        self.axes.set_extent( extent, crs=self.projection )
-        self.axes.scatter( long_list, lati_list, s=self.sms,marker='.',
-                           alpha=self.alpha, transform=self.projection )
+        self.axes.set_extent(extent, crs=self.projection)
+        self.axes.scatter(long_list, lati_list, s=self.sms,marker='.',
+                          alpha=self.alpha, transform=self.projection)
 
     def get_height_over_width(self):
         '''Calculate and return the map height to width ratio
@@ -438,11 +437,11 @@ class MapPlot(PlotBase):
         '''
         if 'position_lat' in data and 'position_long' in data:
             self.axes.scatter(data['position_long'], data['position_lat'],
-                              color=self.highlight_color,marker='.', s=self.sms, alpha=self.alpha,
-                              transform=self.projection )
+                              color=self.highlight_color,marker='.', s=self.sms,
+                              alpha=self.alpha, transform=self.projection)
 
     @property
     def fit_file_names(self):
         '''Returns list of fit file record variable names requred for this plot
         '''
-        return [ 'position_lat', 'position_long' ]
+        return ['position_lat', 'position_long']

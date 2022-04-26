@@ -78,6 +78,8 @@ class TextPlot:
     def __init__(self, fig ):
         self.fig = fig
         self.text_lines = []
+
+        # List of fit file record variable names requred for this plot
         self._fit_file_names = []
 
         # Postion of first text object if not specified
@@ -274,7 +276,7 @@ class BarPlotBase(PlotBase):
 
     @property
     def fit_file_names(self):
-        '''Return list of fit file variable names requred for this plot
+        '''Returns list of fit file record variable names requred for this plot
         '''
         return [ plot_var.fit_file_name for plot_var in self.plot_vars ]
 
@@ -296,19 +298,16 @@ class BarPlotBase(PlotBase):
         '''Sets the value of the bar.
         This virtual function that should be implemented in the derived class
         '''
-        pass
 
     def append_text(self, i ):
         '''Appends text to the ith bar
         This virtual function that should be implemented in the derived class
         '''
-        pass
 
     def make_bar(self, names):
         '''Make bar from a list of names
         This virtual function that should be implemented in the derived class
         '''
-        pass
 
 class BarPlot(BarPlotBase):
     '''Vertical Bar Plot
@@ -321,6 +320,8 @@ class BarPlot(BarPlotBase):
         self.axes.get_yaxis().set_visible(False)
 
     def make_bar(self, names ):
+        '''Make vertical bars from list of names
+        '''
         self.bar = self.axes.bar( x = names, height = [0.0]*len(names), alpha=self.alpha )
 
     def set_bar_value(self, bar, value ):
@@ -346,6 +347,8 @@ class HBarPlot(BarPlotBase):
         self.axes.get_xaxis().set_visible(False)
 
     def make_bar(self, names ):
+        '''Make horizontal bars from list of names
+        '''
         self.bar = self.axes.barh( y = names, width = [0.0]*len(names), alpha=self.alpha )
 
     def set_bar_value(self, bar, value ):
@@ -390,6 +393,8 @@ class ElevationPlot(PlotBase):
 
     @property
     def fit_file_names(self):
+        '''Returns list of fit file record variable names requred for this plot
+        '''
         return [ 'distance', 'altitude' ]
 
 class MapPlot(PlotBase):
@@ -438,4 +443,6 @@ class MapPlot(PlotBase):
 
     @property
     def fit_file_names(self):
+        '''Returns list of fit file record variable names requred for this plot
+        '''
         return [ 'position_lat', 'position_long' ]

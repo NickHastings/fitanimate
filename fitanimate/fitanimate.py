@@ -203,7 +203,7 @@ def main():
 
     # Remove duplicates
     record_names = list(dict.fromkeys(record_names))
-    data_generator = fad.DataGen( fad.prePocessData(args.infile, record_names,
+    data_generator = fad.DataGen( fad.pre_pocess_data(args.infile, record_names,
                                                     int(args.offset*3600.0) ) )
 
     if map_plot:

@@ -4,6 +4,8 @@
 import fitparse
 
 def safe_data( data, name=None):
+    '''Protect against invalid input data
+    '''
     if data is None:
         return None
 
@@ -21,6 +23,8 @@ def safe_data( data, name=None):
 
 
 class DataSet:
+    ''' Container Class for fitfile data
+    '''
     # Only iterpolated these fast changing variables
     do_interpolate =  ['power','speed','cadence']
     def __init__(self):
@@ -29,6 +33,8 @@ class DataSet:
         self.fps = 10
 
     def add_data(self, data ):
+        '''Add a data record
+        '''
         if len(self.data) < 1:
             self.data.append( data )
             return True
@@ -46,6 +52,8 @@ class DataSet:
         return True
 
     def interpolate_data(self):
+        '''Interpolate fast changing data to allow smooth animation
+        '''
         for i in range(len(self.data)-1):
             data0 = self.data[i]
             data1 = self.data[i+1]
@@ -60,17 +68,25 @@ class DataSet:
                 self.int_data.append( dnew )
 
     def number_of_frames(self):
+        '''Return the total number of image frames
+        '''
         return self.fps * len(self.data)
 
     def _interpolate(self, value0, value1, step ):
+        '''Calculate and return an inerpolated data point
+        '''
         return ( (self.fps-step)*value0 + step*value1)/float(self.fps)
 
     def dump(self):
+        '''Write all the data to stdout
+        '''
         for data in self.data:
             print(data)
 
 
-def prePocessData( infile, record_names, timeoffset=None ):
+def pre_pocess_data( infile, record_names, timeoffset=None ) -> DataSet:
+    '''Read a fitfile and return a DataSet of data with the request records
+    '''
     dataset = DataSet()
     fit_file = fitparse.FitFile( infile )
 
@@ -82,13 +98,13 @@ def prePocessData( infile, record_names, timeoffset=None ):
             if timeoffset:
                 data['timestamp'] += timeoffset
 
-            for f in record_names:
-                d = safe_data( message.get_value(f), f )
-                if not d is None:
-                    data[f] = d
+            for feild in record_names:
+                datum = safe_data( message.get_value(feild), feild )
+                if not datum is None:
+                    data[feild] = datum
 
-            ok = dataset.add_data(data)
-            if not ok:
+            success = dataset.add_data(data)
+            if not success:
                 print( 'Problem adding data point. Not adding any more data.')
                 dataset.interpolate_data()
                 return dataset
@@ -100,19 +116,21 @@ def prePocessData( infile, record_names, timeoffset=None ):
         elif ( message_name == 'event' and
                message.get_raw_value('gear_change_data') and
                len(dataset.data)>0 ):
-            gears = '{}-{}'.format(message.get_value('front_gear'),
-                                   message.get_value('rear_gear') )
+            gears = f"{message.get_value('front_gear')}-{message.get_value('rear_gear')}"
             dataset.data[-1]['gears'] = gears
 
     dataset.interpolate_data()
     return dataset
 
-def run(data,fig,plots):
+def run(data, _, plots):
+    '''Update the plots with the data
+    '''
     for plot in plots:
         plot.update(data)
 
-# Yeilds to first argument of run()
 class DataGen():
+    '''Yeilds to first argument of run()
+    '''
     def __init__(self, data_set ):
         self.data_set = data_set
 
@@ -161,7 +179,7 @@ class DataGen():
         gradient_last=0.0
         gradient=0.0
         gradient_list = []
-        for i in range(len(altitude)):
+        for i, _ in enumerate(altitude):
             if (not distance_last is None) and (not altitude_last is None):
                 delta_distance = distance[i]-distance_last
                 delta_altitude = altitude[i]-altitude_last

@@ -4,6 +4,8 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 class TextLine:
+    '''Base class for placeing a line of text
+    '''
     def __init__(self, fig, field_name, txt_format, x=None, y=None, scale=None ):
         self.fig = fig
         self.field_name = field_name
@@ -16,6 +18,8 @@ class TextLine:
         self.fig_txt = None
 
     def set_axes_text(self):
+        '''Sets the text
+        '''
         if not self.fig_txt:
             self.fig_txt = self.fig.text( self.x, self.y, self.txt_format.format( self.value ) )
             return
@@ -23,6 +27,8 @@ class TextLine:
         self.fig_txt.set_text( self.txt_format.format( self.value ) )
 
     def set_value(self, data ):
+        '''Sets the data value
+        '''
         # Don't update the text data if it is just a subsecond interpolation
         if 'interpolated' in data and data['interpolated']:
             return False
@@ -37,6 +43,8 @@ class TextLine:
         return True
 
 class CounterTextLine(TextLine):
+    '''Text line consisting of an incrementing counter
+    '''
     def __init__(self, fig, field_name, txt_format, x=None, y=None ):
         TextLine.__init__(self, fig, field_name, txt_format, x, y )
 
@@ -48,6 +56,8 @@ class CounterTextLine(TextLine):
         return False
 
 class TSTextLine(TextLine):
+    '''A showing a time of arbitrary format
+    '''
     def __init__(self, fig, field_name, txt_format, x=None, y=None,
                  timeformat='%H:%M:%S' ):
         TextLine.__init__(self, fig, field_name, txt_format, x, y )
@@ -114,7 +124,7 @@ class TextPlot:
             text_line.set_axes_text()
 
 class RideText(TextPlot):
-    '''Text ride data to display
+    '''Container for text to be displayed
     '''
     supportedFields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate',
                        'lap', 'gears', 'altitude', 'grad', 'distance']
@@ -183,7 +193,7 @@ class PlotVar:
         return val*self.scale_factor + self.offset
 
     def get_value_units(self, value ):
-        return '{:.0f} {:}'.format(value,self.units)
+        return f'{value:.0f} {self.units:}'
 
 supportedPlots = ['cadence', 'speed', 'power', 'heart_rate', 'None']
 def new_plot_var(variable):
@@ -248,14 +258,13 @@ class BarPlotBase(PlotBase):
 
         self.text = []
 
-        for i, var in enumerate(self.plot_vars):
+        for i, _ in enumerate(self.plot_vars):
             self.append_text(i)
 
     @property
     def fit_file_names(self):
-        """
-        Return list of fit file variable names requred for this plot
-        """
+        '''Return list of fit file variable names requred for this plot
+        '''
         return [ plot_var.fit_file_name for plot_var in self.plot_vars ]
 
     def update(self, data ):

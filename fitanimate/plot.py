@@ -267,7 +267,7 @@ class BarPlotBase(PlotBase):
         for side in ['top','bottom','left','right']:
             self.axes.spines[side].set_visible(False)
 
-        self.make_bar( [ plot_var.name for plot_var in self.plot_vars ] )
+        self.make_bars( [ plot_var.name for plot_var in self.plot_vars ] )
 
         self.text = []
 
@@ -304,7 +304,7 @@ class BarPlotBase(PlotBase):
         This virtual function that should be implemented in the derived class
         '''
 
-    def make_bar(self, names):
+    def make_bars(self, names):
         '''Make bar from a list of names
         This virtual function that should be implemented in the derived class
         '''
@@ -319,7 +319,7 @@ class BarPlot(BarPlotBase):
         self.axes.set_ylim( 0.0, 1.0 )
         self.axes.get_yaxis().set_visible(False)
 
-    def make_bar(self, names ):
+    def make_bars(self, names ):
         '''Make vertical bars from list of names
         '''
         self.bar = self.axes.bar( x = names, height = [0.0]*len(names), alpha=self.alpha )
@@ -346,7 +346,7 @@ class HBarPlot(BarPlotBase):
         self.axes.set_xlim( 0.0, 1.0 )
         self.axes.get_xaxis().set_visible(False)
 
-    def make_bar(self, names ):
+    def make_bars(self, names ):
         '''Make horizontal bars from list of names
         '''
         self.bar = self.axes.barh( y = names, width = [0.0]*len(names), alpha=self.alpha )

@@ -32,11 +32,11 @@ def main():
     )
     parser.add_argument(
         '--fields', type=str, action='append', default=ani.default_fields,
-        help='Fit file variables to display as text.', choices=fap.RideText.supportedFields
+        help='Fit file variables to display as text.', choices=fap.RideText.supported_fields
     )
     parser.add_argument(
         '--plots', type=str, action='append', default=ani.default_plots,
-        help='Fit file variables to display as bar plot.', choices=fap.supportedPlots
+        help='Fit file variables to display as bar plot.', choices=fap.supported_plots
     )
     parser.add_argument(
         '--no-elevation', action='store_true', default=False, help='Disable elevation plot.'

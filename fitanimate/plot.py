@@ -89,6 +89,8 @@ class TextPlot:
         self.dy = -0.06
 
     def add_text_line(self, text_line ):
+        '''Adds new text line
+        '''
         nlines = len(self.text_lines)
 
         if nlines < 1:
@@ -110,12 +112,13 @@ class TextPlot:
 
     @property
     def fit_file_names(self):
-        """
-        Return list of fit file record variable names requred for this plot
-        """
+        '''Returns list of fit file record variable names requred for this plot
+        '''
         return self._fit_file_names
 
     def update(self, data):
+        '''Updates the text
+        '''
         for text_line in self.text_lines:
 
             if not text_line.set_value( data ):
@@ -126,7 +129,7 @@ class TextPlot:
 class RideText(TextPlot):
     '''Container for text to be displayed
     '''
-    supportedFields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate',
+    supported_fields = ['timestamp', 'temperature', 'core_temperature', 'heart_rate',
                        'lap', 'gears', 'altitude', 'grad', 'distance']
     def __init__(self, fig, fields ):
         TextPlot.__init__(self, fig )
@@ -182,20 +185,27 @@ class PlotVar:
 
 
     def get_name_label( self ):
+        '''Return the variables name and units
+        '''
         return f'{self.name} ({self.units})'
 
     def get_norm_value( self, data ):
-        """ Between 0 and 1"""
+        '''Calculate and return the value normalised between 0 and 1
+        '''
         return (self.get_value(data) - self.offset)/(self.max_value-self.min_value)
 
     def get_value(self, data ):
+        '''Calculate and return the scaled value
+        '''
         val = data[self.fit_file_name]
         return val*self.scale_factor + self.offset
 
     def get_value_units(self, value ):
+        '''Return the value with units
+        '''
         return f'{value:.0f} {self.units:}'
 
-supportedPlots = ['cadence', 'speed', 'power', 'heart_rate', 'None']
+supported_plots = ['cadence', 'speed', 'power', 'heart_rate', 'None']
 def new_plot_var(variable):
     '''Return a new PlotVar instance
     '''
@@ -215,7 +225,7 @@ def new_plot_var(variable):
         return None
 
     raise ValueError( f'Illegal variable {variable}. Must be one of: ' +
-                      ', '.join([str(v) for v in supportedPlots]))
+                      ', '.join([str(v) for v in supported_plots]))
 
 class PlotBase:
     '''Base class for a plot
@@ -268,6 +278,8 @@ class BarPlotBase(PlotBase):
         return [ plot_var.fit_file_name for plot_var in self.plot_vars ]
 
     def update(self, data ):
+        '''Updates the stored variables from data
+        '''
         for i, plot_var in enumerate(self.plot_vars) :
             if not plot_var.fit_file_name in data:
                 continue
@@ -280,12 +292,21 @@ class BarPlotBase(PlotBase):
             self.set_bar_value( self.get_bar()[i], value )
 
     def set_bar_value(self, bar, value ):
+        '''Sets the value of the bar.
+        This virtual function that should be implemented in the derived class
+        '''
         pass
 
     def append_text(self, i ):
+        '''Appends text to the ith bar
+        This virtual function that should be implemented in the derived class
+        '''
         pass
 
     def make_bar(self, names):
+        '''Make bar from a list of names
+        This virtual function that should be implemented in the derived class
+        '''
         pass
 
     def get_bar(self):

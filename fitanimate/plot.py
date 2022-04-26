@@ -256,6 +256,7 @@ class BarPlotBase(PlotBase):
     '''
     def __init__(self, plot_vars, axes):
         PlotBase.__init__(self)
+        self.bar = None # To be set in derived classes
         self.plot_vars = plot_vars
         self.axes = axes
         self.axes.autoscale_view('tight')
@@ -289,7 +290,7 @@ class BarPlotBase(PlotBase):
 
             # scale the value for the bar chart
             value = plot_var.get_norm_value(data)
-            self.set_bar_value( self.get_bar()[i], value )
+            self.set_bar_value( self.bar[i], value )
 
     def set_bar_value(self, bar, value ):
         '''Sets the value of the bar.
@@ -307,9 +308,6 @@ class BarPlotBase(PlotBase):
         '''Make bar from a list of names
         This virtual function that should be implemented in the derived class
         '''
-        pass
-
-    def get_bar(self):
         pass
 
 class BarPlot(BarPlotBase):
@@ -337,9 +335,6 @@ class BarPlot(BarPlotBase):
         self.text.append( self.axes.text( i+self.txt_dx, self.txt_dy,
                                           plot_var.get_value_units(0.0) ) )
 
-    def get_bar(self):
-        return self.bar
-
 class HBarPlot(BarPlotBase):
     '''Horizontal Bar Plot
     '''
@@ -364,11 +359,6 @@ class HBarPlot(BarPlotBase):
         plot_var = self.plot_vars[i]
         self.text.append( self.axes.text( self.txt_dx, i+self.txt_dy,
                                           plot_var.get_value_units(0.0) ) )
-
-    def get_bar(self):
-        '''Return the bar object
-        '''
-        return self.bar
 
 class ElevationPlot(PlotBase):
     '''Plot showing the activity elvation trace

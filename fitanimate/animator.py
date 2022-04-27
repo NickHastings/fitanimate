@@ -1,4 +1,4 @@
-'''Implements animatino of Fit file data using
+'''Implements animation of FIT file data using
 matplotlib animation
 '''
 import os

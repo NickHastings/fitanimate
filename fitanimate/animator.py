@@ -189,15 +189,15 @@ class Animator:
             ymin = gs_points[0][1]
             xmax = gs_points[1][0]
             ymax = gs_points[1][1]
-            delta_x=xmax-xmin
-            delta_y=ymax-ymin
+            dx=xmax-xmin
+            dy=ymax-ymin
             if dy_over_dx>1.0: # Tall plot. Maintain gridspec height, change width
-                dx_new = delta_x/dy_over_dx
+                dx_new = dx/dy_over_dx
                 xmin_new = xmax - dx_new
                 self.map.gridspec.update(left=xmin_new)
             else: # Wide plot. Move up
                 # Don't scale to less that 60%... messes up for some reason
-                dy_new = delta_y * max(dy_over_dx,0.6)
+                dy_new = dy * max(dy_over_dx,0.6)
                 ymin_new = ymax - dy_new
                 self.map.gridspec.update(bottom=ymin_new)
 

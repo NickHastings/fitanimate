@@ -25,7 +25,7 @@ video_formats = {
         '4k' : (3840,2160)
 }
 default_fields = ['timestamp', 'temperature', 'heart_rate',
-                     'lap', 'gears', 'altitude', 'grad', 'distance']
+                  'lap', 'gears', 'altitude', 'grad', 'distance']
 default_plots = ['cadence', 'speed', 'power']
 
 def get_font_size(x_size, dpi):

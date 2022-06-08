@@ -7,13 +7,14 @@ import configargparse
 import fitanimate.plot as fap
 import fitanimate.animator as ani
 
+
 def main():
     '''Entry point for fitanimate
     '''
     parser = configargparse.ArgumentParser(
-        default_config_files=
-        [ os.path.join(str(Path.home()), '.config', 'fitanimate', '*.conf'),
-          os.path.join(str(Path.home()), '.fitanimate.conf') ],
+        default_config_files=[
+            os.path.join(str(Path.home()), '.config', 'fitanimate', '*.conf'),
+            os.path.join(str(Path.home()), '.fitanimate.conf')],
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter
     )
 
@@ -25,21 +26,26 @@ def main():
         '--offset', type=float, default=0.0, help='Time offset (hours).'
     )
     parser.add_argument(
-        '--show',    '-s', action='store_true', default=False, help='Show the animation on screen.'
+        '--show',    '-s', action='store_true', default=False,
+        help='Show the animation on screen.'
     )
     parser.add_argument(
-        '--num',    '-n', type=int, default=0, help='Only animate the first NUM frames.'
+        '--num',    '-n', type=int, default=0,
+        help='Only animate the first NUM frames.'
     )
     parser.add_argument(
         '--fields', type=str, action='append', default=ani.default_fields,
-        help='Fit file variables to display as text.', choices=fap.RideText.supported_fields
+        help='Fit file variables to display as text.',
+        choices=fap.RideText.supported_fields
     )
     parser.add_argument(
         '--plots', type=str, action='append', default=ani.default_plots,
-        help='Fit file variables to display as bar plot.', choices=fap.supported_plots
+        help='Fit file variables to display as bar plot.',
+        choices=fap.supported_plots
     )
     parser.add_argument(
-        '--no-elevation', action='store_true', default=False, help='Disable elevation plot.'
+        '--no-elevation', action='store_true', default=False,
+        help='Disable elevation plot.'
     )
     parser.add_argument(
         '--no-map', action='store_true', default=False, help='Disable map.'
@@ -48,7 +54,8 @@ def main():
         '--outfile', '-o', type=str, default=None, help='Output filename.'
     )
     parser.add_argument(
-        '--format', '-f', type=str, default='1080p', choices=ani.video_formats.keys(),
+        '--format', '-f', type=str, default='1080p',
+        choices=ani.video_formats.keys(),
         help='Output video file resolution.'
     )
     parser.add_argument(
@@ -71,7 +78,8 @@ def main():
         '--alpha', type=float, default=0.3, help='Opacity of plots.'
     )
     parser.add_argument(
-        '--vertical', '-v', action='store_true', default=False, help='Plot bars Verticaly.'
+        '--vertical', '-v', action='store_true', default=False,
+        help='Plot bars Verticaly.'
     )
     parser.add_argument(
         '--elevation-factor', '-e', type=float, default=5.0,
@@ -87,6 +95,7 @@ def main():
     animator.setup()
     animator.draw()
     animator.animate()
+
 
 if __name__ == '__main__':
     main()

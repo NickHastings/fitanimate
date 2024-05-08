@@ -16,13 +16,13 @@ import fitanimate.data as fad
 plt.rcdefaults()
 
 video_formats = {
-        '240p': (426, 240),
-        '360p': (640, 360),
-        '480p': (720, 480),
-        '720p': (1280, 720),
-        '1080p': (1920, 1080),
-        '1440p': (2560, 1440),
-        '4k': (3840, 2160)
+    '240p': (426, 240),
+    '360p': (640, 360),
+    '480p': (720, 480),
+    '720p': (1280, 720),
+    '1080p': (1920, 1080),
+    '1440p': (2560, 1440),
+    '4k': (3840, 2160)
 }
 default_fields = ['timestamp', 'temperature', 'heart_rate',
                   'lap', 'gears', 'altitude', 'grad', 'distance']
@@ -33,7 +33,7 @@ def get_font_size(x_size, dpi):
     '''Set font size for a given DPI.
     For 64 point font for 4k (x=3840,y=2160) @ 100 dpi
     '''
-    return int(64 * x_size/3840 * 100.0/dpi)
+    return int(64 * x_size / 3840 * 100.0 / dpi)
 
 
 class Element:
@@ -89,8 +89,8 @@ class Animator:
             'axes.prop_cycle': cycler('color', [self.args.plot_color])
         })
 
-        self.fig = plt.figure(figsize=(x_size/self.args.dpi,
-                                       y_size/self.args.dpi))
+        self.fig = plt.figure(figsize=(x_size / self.args.dpi,
+                                       y_size / self.args.dpi))
 
         self.setup_elevation()
         projection = self.setup_map()
@@ -116,7 +116,7 @@ class Animator:
         record_names = list(dict.fromkeys(record_names))
         self.data_generator = fad.DataGen(
             fad.pre_pocess_data(self.args.infile, record_names,
-                                int(self.args.offset*3600.0)))
+                                int(self.args.offset * 3600.0)))
 
     def setup_elevation(self):
         ''' Setup Elevation plot
@@ -158,7 +158,7 @@ class Animator:
         if self.args.vertical:
             height = 0.15
         else:
-            height = 0.05*len(self.args.plots)
+            height = 0.05 * len(self.args.plots)
 
         self.bar.gridspec.update(left=0.11, right=1.0, top=height, bottom=0.0)
         self.bar.axis = plt.subplot(self.bar.gridspec[0, 0])
@@ -201,7 +201,7 @@ class Animator:
             dx = xmax - xmin
             dy = ymax - ymin
             if dy_over_dx > 1.0:  # Tall. Keep gridspec height, change width
-                dx_new = dx/dy_over_dx
+                dx_new = dx / dy_over_dx
                 xmin_new = xmax - dx_new
                 self.map.gridspec.update(left=xmin_new)
             else:  # Wide plot. Move up
@@ -218,15 +218,15 @@ class Animator:
             number_of_frames = self.args.num
 
         # Time interval between frames in msec.
-        inter = 1000.0/float(self.data_generator.data_set.fps)
+        inter = 1000.0 / float(self.data_generator.data_set.fps)
         anim = animation.FuncAnimation(self.fig, fad.run, self.data_generator,
                                        fargs=(self.fig, tuple(self.plots),),
                                        repeat=False, blit=False,
                                        interval=inter,
                                        save_count=number_of_frames)
+        outf = (os.path.splitext(os.path.basename(
+            self.args.infile.name))[0] + '_overlay.mp4')
 
-        outf = (os.path.splitext(os.path.basename(self.args.infile.name))[0]
-                + '_overlay.mp4')
         if self.args.outfile:
             outf = self.args.outfile
 

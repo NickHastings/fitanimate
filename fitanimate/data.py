@@ -12,7 +12,7 @@ def safe_data(data, name=None):
 
     if name and name in ['position_lat', 'position_long']:
         # Divide by 2^32/360.
-        return data/11930464.7
+        return data / 11930464.7
 
     try:
         float_data = float(data)
@@ -42,7 +42,7 @@ class DataSet:
             return True
 
         t_prev = int(self.data[-1]['timestamp'])
-        delta_time = int(data['timestamp'])-t_prev
+        delta_time = int(data['timestamp']) - t_prev
         if delta_time == 0:
             return True
 
@@ -56,9 +56,9 @@ class DataSet:
     def interpolate_data(self):
         '''Interpolate fast changing data to allow smooth animation
         '''
-        for i in range(len(self.data)-1):
+        for i in range(len(self.data) - 1):
             data0 = self.data[i]
-            data1 = self.data[i+1]
+            data1 = self.data[i + 1]
             self.int_data.append(data0)
             for j in range(1, self.fps):
                 dnew = {}
@@ -78,7 +78,7 @@ class DataSet:
     def _interpolate(self, value0, value1, step):
         '''Calculate and return an inerpolated data point
         '''
-        return ((self.fps-step)*value0 + step*value1)/float(self.fps)
+        return ((self.fps - step) * value0 + step * value1) / float(self.fps)
 
     def dump(self):
         '''Write all the data to stdout
@@ -176,10 +176,10 @@ class DataGen():
             return
 
         while i < len(self.altitude_list) - window_size + 1:
-            altitude.append(sum(self.altitude_list[i: i + window_size])
-                            / window_size)
-            distance.append(sum(self.distance_list[i: i + window_size])
-                            / window_size)
+            altitude.append(sum(self.altitude_list[i: i + window_size]
+                                ) / window_size)
+            distance.append(sum(self.distance_list[i: i + window_size]
+                                ) / window_size)
             i += 1
 
         altitude_last = None
@@ -189,10 +189,10 @@ class DataGen():
         gradient_list = []
         for i, _ in enumerate(altitude):
             if (not (distance_last is None)) and (not (altitude_last is None)):
-                delta_distance = distance[i]-distance_last
-                delta_altitude = altitude[i]-altitude_last
+                delta_distance = distance[i] - distance_last
+                delta_altitude = altitude[i] - altitude_last
                 if delta_distance != 0.0:
-                    gradient = 100.0*delta_altitude/delta_distance
+                    gradient = 100.0 * delta_altitude / delta_distance
 
                 else:
                     gradient = gradient_last

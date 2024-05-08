@@ -26,11 +26,11 @@ def main():
         '--offset', type=float, default=0.0, help='Time offset (hours).'
     )
     parser.add_argument(
-        '--show',    '-s', action='store_true', default=False,
+        '--show', '-s', action='store_true', default=False,
         help='Show the animation on screen.'
     )
     parser.add_argument(
-        '--num',    '-n', type=int, default=0,
+        '--num', '-n', type=int, default=0,
         help='Only animate the first NUM frames.'
     )
     parser.add_argument(

@@ -102,8 +102,8 @@ class TextPlot:
         nlines = len(self.text_lines)
 
         if nlines < 1:
-            xprev = self.x-self.dx
-            yprev = self.y-self.dy
+            xprev = self.x - self.dx
+            yprev = self.y - self.dy
         else:
             xprev = self.text_lines[-1].x
             yprev = self.text_lines[-1].y
@@ -157,7 +157,7 @@ class RideText(TextPlot):
                                         '{:.1f} ℃'))
 
         if 'heart_rate' in self.fields:
-            self.add_text_line(TextLine(self.fig, 'heart_rate',  '{:.0f} BPM'))
+            self.add_text_line(TextLine(self.fig, 'heart_rate', '{:.0f} BPM'))
 
         if 'lap' in self.fields:
             self.add_text_line(CounterTextLine(self.fig, 'lap', 'Lap {}'))
@@ -206,14 +206,13 @@ class PlotVar:
     def get_norm_value(self, data):
         '''Calculate and return the value normalised between 0 and 1
         '''
-        return ((self.get_value(data) - self.offset)
-                / (self.max_value - self.min_value))
+        return (self.get_value(data) - self.offset) / (self.max_value - self.min_value)
 
     def get_value(self, data):
         '''Calculate and return the scaled value
         '''
         val = data[self.fit_file_name]
-        return val*self.scale_factor + self.offset
+        return val * self.scale_factor + self.offset
 
     def get_value_units(self, value):
         '''Return the value with units
@@ -242,7 +241,7 @@ def new_plot_var(variable):
     if variable == 'None':
         return None
 
-    raise ValueError(f'Illegal variable {variable}. Must be one of: ' +
+    raise ValueError(f'Illegal variable {variable}. Must be one of: '
                      ', '.join([str(v) for v in supported_plots]))
 
 
@@ -254,7 +253,7 @@ class PlotBase:
 
     # Nominal marker sizes are for 3840x2160 (4K) at 100 DPI
     nom_dpi = 100.0
-    nom_size = [3840/nom_dpi, 2160/nom_dpi]
+    nom_size = [3840 / nom_dpi, 2160 / nom_dpi]
 
     # Normal plot marker size. Diameter in pixels.
     nom_pms = 12
@@ -265,10 +264,10 @@ class PlotBase:
         size = figure.get_size_inches()
 
         # Scale by size and DPI
-        self.pms = self.nom_pms * size[0]/self.nom_size[0] * dpi/self.nom_dpi
+        self.pms = self.nom_pms * size[0] / self.nom_size[0] * dpi / self.nom_dpi
 
         # area is pi*r^2
-        self.sms = 3.14159*(0.5*self.pms)**2
+        self.sms = 3.14159 * (0.5 * self.pms)**2
 
 
 class BarPlotBase(PlotBase):
@@ -342,7 +341,7 @@ class BarPlot(BarPlotBase):
     def make_bars(self, names):
         '''Make vertical bars from list of names
         '''
-        self.bar = self.axes.bar(x=names, height=[0.0]*len(names),
+        self.bar = self.axes.bar(x=names, height=[0.0] * len(names),
                                  alpha=self.alpha)
 
     def set_bar_value(self, bar, value):
@@ -354,7 +353,7 @@ class BarPlot(BarPlotBase):
         '''Add text to the bar
         '''
         plot_var = self.plot_vars[i]
-        self.text.append(self.axes.text(i+self.txt_dx, self.txt_dy,
+        self.text.append(self.axes.text(i + self.txt_dx, self.txt_dy,
                                         plot_var.get_value_units(0.0)))
 
 
@@ -372,7 +371,7 @@ class HBarPlot(BarPlotBase):
     def make_bars(self, names):
         '''Make horizontal bars from list of names
         '''
-        self.bar = self.axes.barh(y=names, width=[0.0]*len(names),
+        self.bar = self.axes.barh(y=names, width=[0.0] * len(names),
                                   alpha=self.alpha)
 
     def set_bar_value(self, bar, value):
@@ -384,7 +383,7 @@ class HBarPlot(BarPlotBase):
         '''Add text to the bar
         '''
         plot_var = self.plot_vars[i]
-        self.text.append(self.axes.text(self.txt_dx, i+self.txt_dy,
+        self.text.append(self.axes.text(self.txt_dx, i + self.txt_dy,
                                         plot_var.get_value_units(0.0)))
 
 
@@ -443,10 +442,10 @@ class MapPlot(PlotBase):
         lon_max = max(long_list)
         lat_min = min(lati_list)
         lat_max = max(lati_list)
-        dlon = lon_max-lon_min
-        dlat = lat_max-lat_min
-        extent = [lon_min-0.02*dlon, lon_max+0.05*dlon,
-                  lat_min-0.02*dlat, lat_max+0.02*dlat]
+        dlon = lon_max - lon_min
+        dlat = lat_max - lat_min
+        extent = [lon_min - 0.02 * dlon, lon_max + 0.05 * dlon,
+                  lat_min - 0.02 * dlat, lat_max + 0.02 * dlat]
         self.axes.set_extent(extent, crs=self.projection)
         self.axes.scatter(long_list, lati_list, s=self.sms, marker='.',
                           alpha=self.alpha, transform=self.projection)
@@ -455,10 +454,10 @@ class MapPlot(PlotBase):
         '''Calculate and return the map height to width ratio
         '''
         ymin, ymax = self.axes.get_ylim()
-        delta_y = ymax-ymin
+        delta_y = ymax - ymin
         xmin, xmax = self.axes.get_xlim()
-        delta_x = xmax-xmin
-        return delta_y/delta_x
+        delta_x = xmax - xmin
+        return delta_y / delta_x
 
     def update(self, data):
         '''Draw the next data point

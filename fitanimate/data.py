@@ -76,7 +76,7 @@ class DataSet:
         return self.fps * len(self.data)
 
     def _interpolate(self, value0, value1, step):
-        '''Calculate and return an inerpolated data point
+        '''Calculate and return an interpolated data point
         '''
         return ((self.fps - step) * value0 + step * value1) / float(self.fps)
 
@@ -135,7 +135,7 @@ def run(data, _, plots):
 
 
 class DataGen():
-    '''Yeilds to first argument of run()
+    '''Yields to first argument of run()
     '''
     def __init__(self, data_set):
         self.data_set = data_set
@@ -160,11 +160,11 @@ class DataGen():
 
     def make_gradient_data(self):
         '''
-        Smooth second-by-seceond altitude and distance data to get
+        Smooth second-by-second altitude and distance data to get
         better gradient estimates
 
         Easier to do this here instead of in preProcessData()
-        since we now have the altitude and distance arrrays
+        since we now have the altitude and distance arrays
         '''
 
         altitude = []

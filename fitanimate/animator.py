@@ -46,7 +46,7 @@ class Element:
 
 
 class Animator:
-    '''Worker class to perform anaimatons from FIT data
+    '''Worker class to perform animations from FIT data
     '''
     def __init__(self, args):
         self.args = args

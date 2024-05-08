@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class TextLine:
-    '''Base class for placeing a line of text
+    '''Base class for placing a line of text
     '''
     def __init__(self, fig, field_name, txt_format,
                  x=None, y=None, scale=None):
@@ -120,7 +120,7 @@ class TextPlot:
 
     @property
     def fit_file_names(self):
-        '''Returns list of fit file record variable names requred for this plot
+        '''Returns list of fit file record variable names required for this plot
         '''
         return self._fit_file_names
 
@@ -388,7 +388,7 @@ class HBarPlot(BarPlotBase):
 
 
 class ElevationPlot(PlotBase):
-    '''Plot showing the activity elvation trace
+    '''Plot showing the activity elevation trace
     '''
     # vscale: Scale the elevation up by this much relative to the distance
 

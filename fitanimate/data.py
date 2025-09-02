@@ -1,12 +1,10 @@
-''' Manange and process fit file data to be displayed
-'''
+'''Manange and process fit file data to be displayed'''
 
 import fitparse
 
 
 def safe_data(data, name=None):
-    '''Protect against invalid input data
-    '''
+    '''Protect against invalid input data'''
     if data is None:
         return None
 
@@ -24,8 +22,8 @@ def safe_data(data, name=None):
 
 
 class DataSet:
-    ''' Container Class for fitfile data
-    '''
+    '''Container Class for fitfile data'''
+
     # Only iterpolated these fast changing variables
     do_interpolate = ['power', 'speed', 'cadence']
 
@@ -35,8 +33,7 @@ class DataSet:
         self.fps = 10
 
     def add_data(self, data):
-        '''Add a data record
-        '''
+        '''Add a data record'''
         if len(self.data) < 1:
             self.data.append(data)
             return True
@@ -54,8 +51,7 @@ class DataSet:
         return True
 
     def interpolate_data(self):
-        '''Interpolate fast changing data to allow smooth animation
-        '''
+        '''Interpolate fast changing data to allow smooth animation'''
         for i in range(len(self.data) - 1):
             data0 = self.data[i]
             data1 = self.data[i + 1]
@@ -64,32 +60,27 @@ class DataSet:
                 dnew = {}
                 for feild in data0.keys():
                     if feild in data1 and feild in self.do_interpolate:
-                        dnew[feild] = self._interpolate(data0[feild],
-                                                        data1[feild], j)
+                        dnew[feild] = self._interpolate(data0[feild], data1[feild], j)
                         dnew['interpolated'] = True
 
                 self.int_data.append(dnew)
 
     def number_of_frames(self):
-        '''Return the total number of image frames
-        '''
+        '''Return the total number of image frames'''
         return self.fps * len(self.data)
 
     def _interpolate(self, value0, value1, step):
-        '''Calculate and return an interpolated data point
-        '''
+        '''Calculate and return an interpolated data point'''
         return ((self.fps - step) * value0 + step * value1) / float(self.fps)
 
     def dump(self):
-        '''Write all the data to stdout
-        '''
+        '''Write all the data to stdout'''
         for data in self.data:
             print(data)
 
 
 def pre_pocess_data(infile, record_names, timeoffset=None) -> DataSet:
-    '''Read a fitfile and return a DataSet of data with the request records
-    '''
+    '''Read a fitfile and return a DataSet of data with the request records'''
     dataset = DataSet()
     fit_file = fitparse.FitFile(infile)
 
@@ -116,9 +107,11 @@ def pre_pocess_data(infile, record_names, timeoffset=None) -> DataSet:
             # Just append to the previous data
             dataset.data[-1]['lap'] = True
 
-        elif (message_name == 'event' and
-              message.get_raw_value('gear_change_data') and
-              len(dataset.data) > 0):
+        elif (
+            message_name == 'event'
+            and message.get_raw_value('gear_change_data')
+            and len(dataset.data) > 0
+        ):
             front_gear = message.get_value('front_gear')
             rear_gear = message.get_value('rear_gear')
             dataset.data[-1]['gears'] = f"{front_gear}-{rear_gear}"
@@ -128,15 +121,14 @@ def pre_pocess_data(infile, record_names, timeoffset=None) -> DataSet:
 
 
 def run(data, _, plots):
-    '''Update the plots with the data
-    '''
+    '''Update the plots with the data'''
     for plot in plots:
         plot.update(data)
 
 
-class DataGen():
-    '''Yields to first argument of run()
-    '''
+class DataGen:
+    '''Yields to first argument of run()'''
+
     def __init__(self, data_set):
         self.data_set = data_set
 
@@ -176,10 +168,8 @@ class DataGen():
             return
 
         while i < len(self.altitude_list) - window_size + 1:
-            altitude.append(sum(self.altitude_list[i: i + window_size]
-                                ) / window_size)
-            distance.append(sum(self.distance_list[i: i + window_size]
-                                ) / window_size)
+            altitude.append(sum(self.altitude_list[i : i + window_size]) / window_size)
+            distance.append(sum(self.distance_list[i : i + window_size]) / window_size)
             i += 1
 
         altitude_last = None

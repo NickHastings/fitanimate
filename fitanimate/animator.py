@@ -1,6 +1,7 @@
 '''Implements animation of FIT file data using
 matplotlib animation
 '''
+
 import os
 
 from cycler import cycler
@@ -22,10 +23,18 @@ video_formats = {
     '720p': (1280, 720),
     '1080p': (1920, 1080),
     '1440p': (2560, 1440),
-    '4k': (3840, 2160)
+    '4k': (3840, 2160),
 }
-default_fields = ['timestamp', 'temperature', 'heart_rate',
-                  'lap', 'gears', 'altitude', 'grad', 'distance']
+default_fields = [
+    'timestamp',
+    'temperature',
+    'heart_rate',
+    'lap',
+    'gears',
+    'altitude',
+    'grad',
+    'distance',
+]
 default_plots = ['cadence', 'speed', 'power']
 
 
@@ -37,8 +46,8 @@ def get_font_size(x_size, dpi):
 
 
 class Element:
-    '''An plot element to drawn
-    '''
+    '''An plot element to drawn'''
+
     def __init__(self, gridspec=None, axis=None, plot=None):
         self.gridspec = gridspec
         self.axis = axis
@@ -46,8 +55,8 @@ class Element:
 
 
 class Animator:
-    '''Worker class to perform animations from FIT data
-    '''
+    '''Worker class to perform animations from FIT data'''
+
     def __init__(self, args):
         self.args = args
 
@@ -60,8 +69,7 @@ class Animator:
         self.bar = None
 
     def setup(self):
-        '''Sets up plots based on the passed arguments
-        '''
+        '''Sets up plots based on the passed arguments'''
 
         if self.args.test:
             self.args.format = '360p'
@@ -69,28 +77,29 @@ class Animator:
 
         if len(self.args.plots) != len(default_plots):
             # The user specified plots, remove the defaults
-            self.args.plots = self.args.plots[len(default_plots):]
+            self.args.plots = self.args.plots[len(default_plots) :]
 
         if len(self.args.fields) != len(default_fields):  # As above
-            self.args.fields = self.args.fields[len(default_fields):]
+            self.args.fields = self.args.fields[len(default_fields) :]
 
         fap.PlotBase.alpha = self.args.alpha
         fap.PlotBase.highlight_color = self.args.highlight_color
 
         x_size, y_size = video_formats[self.args.format]
 
-        plt.rcParams.update({
-            'font.size': get_font_size(x_size, self.args.dpi),
-            'figure.dpi': self.args.dpi,
-            'text.color': self.args.text_color,
-            'axes.labelcolor': self.args.text_color,
-            'xtick.color': self.args.text_color,
-            'ytick.color': self.args.text_color,
-            'axes.prop_cycle': cycler('color', [self.args.plot_color])
-        })
+        plt.rcParams.update(
+            {
+                'font.size': get_font_size(x_size, self.args.dpi),
+                'figure.dpi': self.args.dpi,
+                'text.color': self.args.text_color,
+                'axes.labelcolor': self.args.text_color,
+                'xtick.color': self.args.text_color,
+                'ytick.color': self.args.text_color,
+                'axes.prop_cycle': cycler('color', [self.args.plot_color]),
+            }
+        )
 
-        self.fig = plt.figure(figsize=(x_size / self.args.dpi,
-                                       y_size / self.args.dpi))
+        self.fig = plt.figure(figsize=(x_size / self.args.dpi, y_size / self.args.dpi))
 
         self.setup_elevation()
         projection = self.setup_map()
@@ -104,8 +113,9 @@ class Animator:
             self.plots.append(self.map.plot)
 
         if self.elevation:
-            self.elevation.plot = fap.ElevationPlot(self.elevation.axis,
-                                                    self.args.elevation_factor)
+            self.elevation.plot = fap.ElevationPlot(
+                self.elevation.axis, self.args.elevation_factor
+            )
             self.plots.append(self.elevation.plot)
 
         record_names = []
@@ -115,12 +125,13 @@ class Animator:
         # Remove duplicates
         record_names = list(dict.fromkeys(record_names))
         self.data_generator = fad.DataGen(
-            fad.pre_pocess_data(self.args.infile, record_names,
-                                int(self.args.offset * 3600.0)))
+            fad.pre_pocess_data(
+                self.args.infile, record_names, int(self.args.offset * 3600.0)
+            )
+        )
 
     def setup_elevation(self):
-        ''' Setup Elevation plot
-        '''
+        '''Setup Elevation plot'''
         if self.args.no_elevation:
             # Don't make the elevation plot
             for field in ['altitude', 'grad']:  # Remove related text
@@ -129,13 +140,11 @@ class Animator:
 
         else:
             self.elevation = Element(gspec.GridSpec(1, 1))
-            self.elevation.gridspec.update(left=0.6, right=1.0,
-                                           top=1.0, bottom=0.8)
+            self.elevation.gridspec.update(left=0.6, right=1.0, top=1.0, bottom=0.8)
             self.elevation.axis = plt.subplot(self.elevation.gridspec[0, 0])
 
     def setup_map(self):
-        '''Setup map plot
-        '''
+        '''Setup map plot'''
         if self.args.no_map:
             field = 'distance'
             if field in self.args.fields:
@@ -145,14 +154,12 @@ class Animator:
         projection = crs.PlateCarree()
         self.map = Element(gspec.GridSpec(1, 1))
         self.map.gridspec.update(left=0.6, right=1.0, top=0.8, bottom=0.4)
-        self.map.axis = plt.subplot(self.map.gridspec[0, 0],
-                                    projection=projection)
+        self.map.axis = plt.subplot(self.map.gridspec[0, 0], projection=projection)
 
         return projection
 
     def setup_bar(self):
-        ''' Setup bar plot
-        '''
+        '''Setup bar plot'''
         self.bar = Element(gspec.GridSpec(1, 1))
         # If horizontal, size depends on the number of bars
         if self.args.vertical:
@@ -163,7 +170,7 @@ class Animator:
         self.bar.gridspec.update(left=0.11, right=1.0, top=height, bottom=0.0)
         self.bar.axis = plt.subplot(self.bar.gridspec[0, 0])
 
-        self.fig.patch.set_alpha(0.)  # Transparant background
+        self.fig.patch.set_alpha(0.0)  # Transparant background
         # See https://adrian.pw/blog/matplotlib-transparent-animation/
 
         plot_vars = []
@@ -179,16 +186,16 @@ class Animator:
         self.plots = [plot_bar]
 
     def draw(self):
-        '''Draw the empty plots
-        '''
+        '''Draw the empty plots'''
         if self.map.plot:
-            self.map.plot.draw_base_plot(self.data_generator.long_list,
-                                         self.data_generator.lati_list)
+            self.map.plot.draw_base_plot(
+                self.data_generator.long_list, self.data_generator.lati_list
+            )
 
         if self.elevation.plot:
             self.elevation.plot.draw_base_plot(
-                self.data_generator.distance_list,
-                self.data_generator.altitude_list)
+                self.data_generator.distance_list, self.data_generator.altitude_list
+            )
 
         # Check the dimensions of the map plot and move it to the edge/top
         if self.map.plot:
@@ -211,29 +218,41 @@ class Animator:
                 self.map.gridspec.update(bottom=ymin_new)
 
     def animate(self):
-        '''Animate the data on the plots
-        '''
+        '''Animate the data on the plots'''
         number_of_frames = self.data_generator.data_set.number_of_frames()
         if self.args.num:
             number_of_frames = self.args.num
 
         # Time interval between frames in msec.
         inter = 1000.0 / float(self.data_generator.data_set.fps)
-        anim = animation.FuncAnimation(self.fig, fad.run, self.data_generator,
-                                       fargs=(self.fig, tuple(self.plots),),
-                                       repeat=False, blit=False,
-                                       interval=inter,
-                                       save_count=number_of_frames)
-        outf = (os.path.splitext(os.path.basename(
-            self.args.infile.name))[0] + '_overlay.mp4')
+        anim = animation.FuncAnimation(
+            self.fig,
+            fad.run,
+            self.data_generator,
+            fargs=(
+                self.fig,
+                tuple(self.plots),
+            ),
+            repeat=False,
+            blit=False,
+            interval=inter,
+            save_count=number_of_frames,
+        )
+        outf = (
+            os.path.splitext(os.path.basename(self.args.infile.name))[0]
+            + '_overlay.mp4'
+        )
 
         if self.args.outfile:
             outf = self.args.outfile
 
         if not self.args.show:
-            anim.save(outf, codec="png", fps=self.data_generator.data_set.fps,
-                      savefig_kwargs={'transparent': True,
-                                      'facecolor': 'none'})
+            anim.save(
+                outf,
+                codec="png",
+                fps=self.data_generator.data_set.fps,
+                savefig_kwargs={'transparent': True, 'facecolor': 'none'},
+            )
 
         if self.args.show:
             plt.show()

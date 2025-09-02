@@ -34,7 +34,7 @@ class TextLine:
         if 'interpolated' in data and data['interpolated']:
             return False
 
-        if not (self.field_name in data):
+        if self.field_name not in data:
             return False
 
         self.value = data[self.field_name]
@@ -308,7 +308,7 @@ class BarPlotBase(PlotBase):
     def update(self, data):
         '''Updates the stored variables from data'''
         for i, plot_var in enumerate(self.plot_vars):
-            if not (plot_var.fit_file_name in data):
+            if plot_var.fit_file_name not in data:
                 continue
 
             value = plot_var.get_value(data)

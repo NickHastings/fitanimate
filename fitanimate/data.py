@@ -94,7 +94,7 @@ def pre_pocess_data(infile, record_names, timeoffset=None) -> DataSet:
 
             for feild in record_names:
                 datum = safe_data(message.get_value(feild), feild)
-                if not (datum is None):
+                if datum is not None:
                     data[feild] = datum
 
             success = dataset.add_data(data)
@@ -178,7 +178,7 @@ class DataGen:
         gradient = 0.0
         gradient_list = []
         for i, _ in enumerate(altitude):
-            if (not (distance_last is None)) and (not (altitude_last is None)):
+            if (distance_last is not None) and (altitude_last is not None):
                 delta_distance = distance[i] - distance_last
                 delta_altitude = altitude[i] - altitude_last
                 if delta_distance != 0.0:
